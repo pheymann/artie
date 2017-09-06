@@ -63,14 +63,14 @@ testing refactorings for my-service:
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 ```
 
-For some examples take a look into the [integration tests]() or [examples]().
+For some examples take a look into the [integration tests](https://github.com/pheymann/artie/tree/master/core/src/it/scala/artie) or [examples](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/single).
 
 ## Table of Contents
- - [Read responses]()
- - [Providers]()
- - [TestConfig]()
- - [Request Builder]()
- - [Add your Database]()
+ - [Read responses](#read-responses)
+ - [Providers](#providers)
+ - [TestConfig](#testconfig)
+ - [Request Builder](#request-builder)
+ - [Add your Database](#add-your-database)
 
 ### Read responses
 You have to provide functions mapping raw json strings to your `case class` instances.
@@ -103,8 +103,8 @@ val id = select('userIds, providers).next
 val idO = select('userIds, providers).nextOpt
 ```
 
-This **id** based select is typesafe thanks to [shapeless](). This means your compiler
-will tell you if you try to select an non-existing provider.
+This **id** based select is typesafe thanks to [shapeless](https://github.com/milessabin/shapeless). 
+This means your compiler will tell you if you try to select an non-existing provider.
 
 #### Static
 Provides data from a static sequence:
@@ -132,7 +132,7 @@ provide[Long].database.random("users", "id", 100, dbConfig)
 ```
 
 ##### Database Configuration
- - `database`: an instance of [Database](), currently only `MySql` but can easily created for other DBs
+ - `database`: an instance of [Database](), currently only `mysql` but can easily created for other DBs
  - `host`: host machine of the DB
  - `user`: database user
  - `password`: database user password
