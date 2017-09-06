@@ -1,5 +1,5 @@
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
-You want to change a (legacy) REST service which has not tests and it is impossible to
+You want to change a (legacy) REST service which has no tests and it is impossible to
 write some without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
 two instances of your service (old and new) and compare the responses.
@@ -92,7 +92,7 @@ They are called `Read`s and implemented like this:
 ```Scala
 object PlayJsonToRead {
 
-  def read[U](implicit reads: Reads[U]): Read[U] = new Read[U] {
+  def read[U](implicit reads: play.json.Reads[U]): Read[U] = new Read[U] {
     def apply(json: String): Either[String, U] = 
       Json.fromJson[U](Json.parse(json)) match {
         case JsSuccess(u, _) => Right(u)
@@ -103,10 +103,10 @@ object PlayJsonToRead {
 ```
 
 ### Providers
-Providers select a single elements randomly on every `next` from an underlying
+Providers select a single element randomly on every `next` from an underlying
 data set.
 
-To select the next element you have to determine the provide by is **id**:
+To select the next element you have to determine the provide by its **id**:
 
 ```Scala
 // for a scalar value
@@ -188,7 +188,7 @@ get(???, p)
 ```
 
 ### Add your Database
-You can add your Database as easy that:
+You can add your Database as easy as this:
 
 ```Scala
 object mysql extends Database {
