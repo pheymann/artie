@@ -145,7 +145,7 @@ provide[Long].database.random("users", "id", 100, dbConfig)
 ```
 
 ##### Database Configuration
- - `database`: an instance of [Database](), currently only `mysql` but can easily created for other DBs
+ - `database`: an instance of [Database](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/DataGenerator.scala#L30-L35), currently only `mysql` but can easily created for other DBs
  - `host`: host machine of the DB
  - `user`: database user
  - `password`: database user password
