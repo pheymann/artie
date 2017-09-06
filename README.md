@@ -72,6 +72,7 @@ For some examples take a look into the [integration tests](https://github.com/ph
  - [TestConfig](#testconfig)
  - [Request Builder](#request-builder)
  - [Add your Database](#add-your-database)
+ - [Ignore Response Fields](#ignore-response-fields)
 
 ### Get This Framework
 As this is still WIP you can only clone and build it:
@@ -203,4 +204,19 @@ object mysql extends Database {
        |LIMIT $limit
        |""".stripMargin  
 }
+```
+### Ignore Response Fields
+Sometimes it is necessary to ignore some response fields (eg. timestamp). If you don't want to rewrite your
+json mapping you can provide a `Compare` instance:
+
+```
+final case class Log(msg: String, time: Long)
+
+implicit val logComp = new Compare[Log] {
+  def compare(l: Log, r: Log) = Seq(
+    diff("msg")(l.msg, r.msg)
+  }
+}
+   
+check("log-endpoint", providers, conf, read[Log]) { ...}
 ```
