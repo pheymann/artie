@@ -1,0 +1,7 @@
+# ide
+ensime-plugin.sbt
+*.*~
+
+# sbt
+target
+project/project
