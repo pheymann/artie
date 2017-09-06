@@ -66,11 +66,23 @@ Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 For some examples take a look into the [integration tests](https://github.com/pheymann/artie/tree/master/core/src/it/scala/artie) or [examples](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/single).
 
 ## Table of Contents
+ - [Get This Framework](#get-this-framework)
  - [Read responses](#read-responses)
  - [Providers](#providers)
  - [TestConfig](#testconfig)
  - [Request Builder](#request-builder)
  - [Add your Database](#add-your-database)
+
+### Get This Framework
+As this is still WIP you can only clone and build it:
+
+```
+git clone https://github.com/pheymann/artie.git
+cd artie
+sbt "publishLocal"
+```
+
+But I will push it to Maven as fast as possible.
 
 ### Read responses
 You have to provide functions mapping raw json strings to your `case class` instances.
