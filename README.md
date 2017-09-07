@@ -110,7 +110,7 @@ object PlayJsonToRead {
 ```
 
 ### Response Comparison
-Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your response classes `R` 
+Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your responses of class `R` 
 and comparing each field:
 
 ```Scala
@@ -121,7 +121,7 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is abler to compare:
+Currently the framework is able to compare:
   - simple case classes
   - nested case classes
   - sequences of primitives or case classes
