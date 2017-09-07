@@ -43,7 +43,7 @@ And run it:
 
 ```
 # if both instances behave the same
-sbt "it:test"
+sbt "it:runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
@@ -51,7 +51,7 @@ testing refactorings for my-service:
 Success: Total: 1; Succeeded: 1, Invalid: 0; Failed: 0
 
 # in presence of differences
-sbt "it:test"
+sbt "it:runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
