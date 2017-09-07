@@ -67,6 +67,7 @@ For some examples take a look into the [integration tests](https://github.com/ph
 
 ## Table of Contents
  - [Get This Framework](#get-this-framework)
+ - [Dependencies](#dependencies)
  - [Read responses](#read-responses)
  - [Response Comparison](#response-comparison)
  - [Providers](#providers)
@@ -85,6 +86,11 @@ sbt "publishLocal"
 ```
 
 But I will push it to Maven as fast as possible.
+
+### Dependencies
+I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
+  - [shapeless](https://github.com/milessabin/shapeless/)
+  - [scalaj-http](https://github.com/scalaj/scalaj-http/)
 
 ### Read responses
 You have to provide functions mapping raw json strings to your `case class` instances.
