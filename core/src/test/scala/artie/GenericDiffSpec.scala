@@ -8,6 +8,7 @@ final case class User(name: String, age: Int)
 final case class Friends(base: User, friend: User)
 final case class Group(id: Long, users: Seq[User])
 final case class UserGroups(groups: Map[String, Group])
+final case class UserGroupsId(groups: Map[Int, Group])
 
 final class GenericDiffSpec extends Specification {
 
@@ -69,6 +70,7 @@ final class GenericDiffSpec extends Specification {
     "nested case classes with maps" >> {
       diff(UserGroups(Map.empty), UserGroups(Map.empty)) === Nil
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1))))) === Nil
+      diff(UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1)))), UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1))))) === Nil
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Seq(
         MapDiff("groups", Seq(
           "a" -> TotalDiff(Seq(SeqDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))

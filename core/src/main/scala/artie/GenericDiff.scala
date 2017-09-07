@@ -150,11 +150,11 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
   // case: LabelledGenerics in a `Map`
   //  - compares elements by key
   //  - collects missing key-value pairs
-  implicit def mapGenDiff[K <: Symbol, V, R <: HList, T <: HList](implicit wit: Witness.Aux[K],
-                                                                           gen: LabelledGeneric.Aux[V, R],
-                                                                           genDiffH: Lazy[GenericDiff[R]],
-                                                                           genDiffT: Lazy[GenericDiff[T]])
-      : GenericDiff[FieldType[K, Map[String, V]] :: T] = new GenericDiff[FieldType[K, Map[String, V]] :: T] {
+  implicit def mapGenDiff[K <: Symbol, VK, V, R <: HList, T <: HList](implicit wit: Witness.Aux[K],
+                                                                               gen: LabelledGeneric.Aux[V, R],
+                                                                               genDiffH: Lazy[GenericDiff[R]],
+                                                                               genDiffT: Lazy[GenericDiff[T]])
+      : GenericDiff[FieldType[K, Map[VK, V]] :: T] = new GenericDiff[FieldType[K, Map[VK, V]] :: T] {
     def apply(l: HI, r: HI): Seq[Diff] = {
       val sizeDiff = {
         // compare sizes
@@ -175,8 +175,8 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
 
       // collect missing key-value pairs
       val missingDiffs = {
-        val diffL: Seq[(String, Diff)] = missingKeysL.map(key => key -> MissingValue(l.head(key)))(collection.breakOut)
-        val diffR: Seq[(String, Diff)] = missingKeysR.map(key => key -> MissingValue(r.head(key)))(collection.breakOut)
+        val diffL: Seq[(String, Diff)] = missingKeysL.map(key => key.toString -> MissingValue(l.head(key)))(collection.breakOut)
+        val diffR: Seq[(String, Diff)] = missingKeysR.map(key => key.toString -> MissingValue(r.head(key)))(collection.breakOut)
 
         diffL ++: diffR
       }
@@ -192,7 +192,7 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
               val innerDiffs = genDiffH.value(gen.to(valueL), gen.to(valueR))
               
               if (innerDiffs.isEmpty) None
-              else                    Some(key -> TotalDiff(innerDiffs))
+              else                    Some(key.toString -> TotalDiff(innerDiffs))
             }
             .getOrElse(None)
         }(collection.breakOut)
