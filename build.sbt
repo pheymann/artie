@@ -1,6 +1,30 @@
 lazy val commonSettings = Seq(
   version       := "0.1.0",
-  scalaVersion  := "2.12.3"
+  scalaVersion  := "2.12.3",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "utf-8",
+    "-explaintypes",
+    "-feature",
+    "-unchecked",
+    "-Xfatal-warnings",
+    "-Xfuture",
+    "-Xlint:inaccessible",
+    "-Xlint:infer-any",
+    "-Xlint:missing-interpolator",
+    "-Xlint:option-implicit",
+    "-Xlint:type-parameter-shadow",
+    "-Xlint:unsound-match",
+    "-Ywarn-dead-code",
+    "-Ywarn-inaccessible",
+    "-Ywarn-infer-any",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-unused:implicits",
+    "-Ywarn-unused:imports",
+    "-Ywarn-unused:locals",
+    "-Ywarn-unused:patvars",
+    "-Ywarn-unused:privates"
+  )
 )
 
 lazy val artie = project

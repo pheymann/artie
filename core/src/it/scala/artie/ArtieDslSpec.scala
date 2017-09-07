@@ -10,7 +10,7 @@ import play.api.libs.json._
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
-final case class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
+final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
 
   sequential
 

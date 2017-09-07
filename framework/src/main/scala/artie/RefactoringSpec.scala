@@ -7,7 +7,7 @@ import scala.concurrent.{Future, Await}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-final case class LazyCheck(run: Unit => Future[TestState])
+final case class LazyCheck(run: () => Future[TestState])
 
 abstract class RefactoringSpec(service: String) {
 
@@ -21,7 +21,7 @@ abstract class RefactoringSpec(service: String) {
   def check[P <: HList, A, H <: HList](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
                                       (f: Random => P => RequestT)
                                       (implicit gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): Unit = {
-    checks += (endpoint -> LazyCheck(_ => artie.check(providersF, config, read, rand)(f)))
+    checks += (endpoint -> LazyCheck(() => artie.check(providersF, config, read, rand)(f)))
   }
 
   def waitTimeout = 10.minutes
@@ -69,7 +69,7 @@ abstract class RefactoringSpec(service: String) {
     }
 
     val states     = Await.result(statesF, waitTimeout)
-    val totalState = states.foldLeft(TestState(0, 0, 0)) { case (acc, (endpoint, state)) =>
+    val totalState = states.foldLeft(TestState(0, 0, 0)) { case (acc, (_, state)) =>
       acc <+> state
     }
 

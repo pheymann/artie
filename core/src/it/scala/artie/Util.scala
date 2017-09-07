@@ -1,6 +1,6 @@
 package artie
 
-import java.sql.{ResultSet, Statement, DriverManager, Connection}
+import java.sql.{Statement, DriverManager, Connection}
 
 object Util {
 

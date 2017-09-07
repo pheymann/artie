@@ -2,7 +2,6 @@ package artie
 
 import shapeless._
 import shapeless.labelled.FieldType
-import shapeless.record._
 
 trait Diff {
 

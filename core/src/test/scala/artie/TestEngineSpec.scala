@@ -59,8 +59,6 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
       import shapeless._
       import scala.util.Random
 
-      val rand = new Random()
-
       val conf = config("base", 0, "ref", 1)
 
       val prov0 = provide[Unit].static(())

@@ -64,6 +64,7 @@ abstract class ServerRoutes {
     case NonFatal(cause) =>
       extractUri { uri =>
         println(s"Request to $uri could not be handled normally")
+        cause.printStackTrace()
         complete(HttpResponse(StatusCodes.InternalServerError, entity = "something went wrong here!!!"))
       }
   }

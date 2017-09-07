@@ -1,8 +1,6 @@
 package artie
 
 import shapeless._
-import shapeless.record._
-import shapeless.syntax.singleton._
 import scalaj.http._
 
 import scala.util.Random

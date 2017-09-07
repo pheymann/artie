@@ -12,7 +12,6 @@ import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 
 import scala.io.StdIn
 import scala.util.control.NonFatal
-import scala.concurrent.{Future, ExecutionContext}
 
 object PlayJsonToRead {
 
@@ -61,6 +60,7 @@ abstract class ServerRoutes {
     case NonFatal(cause) =>
       extractUri { uri =>
         println(s"Request to $uri could not be handled normally")
+        cause.printStackTrace()
         complete(HttpResponse(StatusCodes.InternalServerError, entity = "something went wrong here!!!"))
       }
   }

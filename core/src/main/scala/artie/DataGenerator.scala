@@ -8,8 +8,6 @@ trait DataGenerator
 
 trait RandomGenerator[A] extends DataGenerator {
 
-  import RandomGenerator._
-
   def apply(min: A, max: A, rand: Unit => Double): A
 }
 

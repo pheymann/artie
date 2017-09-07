@@ -70,7 +70,7 @@ package object artie extends Request with TestConfigOps with TestStateOps {
                                            (f: Random => P => RequestT)
                                            (duration: FiniteDuration)
                                            (implicit ec: ExecutionContext, gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): TestState =
-    Await.result(check(providersF, config, read, initRandom, ioEffect)(f), duration)
+    Await.result(check(providersF, config, read, rand, ioEffect)(f), duration)
 
   def printReasons(state: TestState): Unit =
     if (state.reasons.nonEmpty)

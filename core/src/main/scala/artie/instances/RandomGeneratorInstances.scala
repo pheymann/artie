@@ -2,8 +2,6 @@ package artie.instances
 
 import artie.RandomGenerator
 
-import scala.util.Random
-
 trait RandomInstances {
 
   import RandomGenerator._
@@ -18,18 +16,18 @@ trait RandomGeneratorInstances {
   type GenRand = Unit => Double
 
   implicit val randIntGen = new RandomGenerator[Int] {
-    override def apply(min: Int, max: Int, rand: GenRand): Int = ((max - min) * rand()).toInt + min
+    override def apply(min: Int, max: Int, rand: GenRand): Int = ((max - min) * rand(Unit)).toInt + min
   }
 
   implicit val randLongGen = new RandomGenerator[Long] {
-    override def apply(min: Long, max: Long, rand: GenRand): Long = ((max - min) * rand()).toLong + min
+    override def apply(min: Long, max: Long, rand: GenRand): Long = ((max - min) * rand(Unit)).toLong + min
   }
 
   implicit val randFloatGen = new RandomGenerator[Float] {
-    override def apply(min: Float, max: Float, rand: GenRand): Float = ((max - min) * rand().toFloat) + min
+    override def apply(min: Float, max: Float, rand: GenRand): Float = ((max - min) * rand(Unit).toFloat) + min
   }
 
   implicit val randDoubleGen = new RandomGenerator[Double] {
-    override def apply(min: Double, max: Double, rand: GenRand): Double = ((max - min) * rand()) + min
+    override def apply(min: Double, max: Double, rand: GenRand): Double = ((max - min) * rand(Unit)) + min
   }
 }
