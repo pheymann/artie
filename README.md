@@ -90,6 +90,12 @@ You have to provide functions mapping raw json strings to your `case class` inst
 They are called `Read`s and implemented like this:
 
 ```Scala
+// by hand
+implicit val userRead = new Read[User] {
+  def apply(json: String): Either[String, User] = ???
+}
+
+// or by reusing your mappings from some frameworks
 object PlayJsonToRead {
 
   def read[U](implicit reads: play.json.Reads[U]): Read[U] = new Read[U] {
