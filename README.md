@@ -68,6 +68,7 @@ For some examples take a look into the [integration tests](https://github.com/ph
 ## Table of Contents
  - [Get This Framework](#get-this-framework)
  - [Read responses](#read-responses)
+ - [Response Comparison](#response-comparison)
  - [Providers](#providers)
  - [TestConfig](#testconfig)
  - [Request Builder](#request-builder)
@@ -107,6 +108,26 @@ object PlayJsonToRead {
   }
 }
 ```
+
+### Response Comparison
+Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your response classes `R` 
+and comparing each field:
+
+```Scala
+(old: R, refact: R) => (old: FieldValues, refact: FieldValues) => Seq[Diff]
+```
+
+The result is a sequence of `Diff` with each diff providing the field name and:
+  - the two original values,
+  - a set of diffs of the two values.
+
+Currently the framework is abler to compare:
+  - simple case classes
+  - nested case classes
+  - sequences of primitives or case classes
+  - maps of primitives or case classes
+
+If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
 
 ### Providers
 Providers select a single element randomly on every `next` from an underlying
