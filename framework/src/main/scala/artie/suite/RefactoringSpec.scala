@@ -20,7 +20,9 @@ abstract class RefactoringSpec(val service: String) {
 
   def check[P <: HList, A, H <: HList](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
                                       (f: Random => P => RequestT)
-                                      (implicit gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): Unit = {
+                                      (implicit gen: LabelledGeneric.Aux[A, H],
+                                                genDiff: Lazy[GenericDiff[H]],
+                                                comp: Compare[A] = Compare.default[A]): Unit = {
     checks += (endpoint -> LazyCheck(() => artie.check(providersF, config, read, rand)(f)))
   }
 }

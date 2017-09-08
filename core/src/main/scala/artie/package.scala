@@ -21,12 +21,23 @@ package object artie extends Request with ProviderOps with TestConfigOps with Da
 
   def select[P <: HList](name: Witness, providers: P)(implicit select: Selector[P, name.T]): select.Out = select(providers)
 
-  def check[P <: HList, A, H <: HList](providersF: Future[P], config: TestConfig, read: Read[A], rand: Random = initRandom, ioEffect: HttpRequest => HttpResponse[String] = _.asString)
+  def check[P <: HList, A, H <: HList](providersF: Future[P],
+                                       config: TestConfig,
+                                       read: Read[A],
+                                       rand: Random = initRandom,
+                                       ioEffect: HttpRequest => HttpResponse[String] = _.asString)
                                       (f: Random => P => RequestT)
-                                      (implicit ec: ExecutionContext, gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): Future[TestState] =
+                                      (implicit ec: ExecutionContext,
+                                                gen: LabelledGeneric.Aux[A, H],
+                                                genDiff: Lazy[GenericDiff[H]],
+                                                comp: Compare[A] = Compare.default[A]): Future[TestState] =
     TestEngine.run(rand, providersF, config, f, read, ioEffect)
 
-  def checkAwait[P <: HList, A, H <: HList](providersF: Future[P], config: TestConfig, read: Read[A], rand: Random = initRandom, ioEffect: HttpRequest => HttpResponse[String] = _.asString)
+  def checkAwait[P <: HList, A, H <: HList](providersF: Future[P],
+                                            config: TestConfig,
+                                            read: Read[A],
+                                            rand: Random = initRandom,
+                                            ioEffect: HttpRequest => HttpResponse[String] = _.asString)
                                            (f: Random => P => RequestT)
                                            (duration: FiniteDuration)
                                            (implicit ec: ExecutionContext, gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): TestState =

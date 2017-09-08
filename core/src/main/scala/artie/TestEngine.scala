@@ -10,8 +10,16 @@ object TestEngine {
 
   type ResponseT = HttpResponse[String]
 
-  def run[P <: HList, A, H <: HList](rand: Random, pf: Future[P], config: TestConfig, requestGen: Random => P => RequestT, read: Read[A], ioEffect: HttpRequest => HttpResponse[String])
-                                    (implicit ec: ExecutionContext, gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): Future[TestState] = {
+  def run[P <: HList, A, H <: HList](rand: Random,
+                                     pf: Future[P],
+                                     config: TestConfig,
+                                     requestGen: Random => P => RequestT,
+                                     read: Read[A],
+                                     ioEffect: HttpRequest => HttpResponse[String])
+                                    (implicit ec: ExecutionContext,
+                                              gen: LabelledGeneric.Aux[A, H],
+                                              genDiff: Lazy[GenericDiff[H]],
+                                              comp: Compare[A] = Compare.default[A]): Future[TestState] = {
     def request(p: P): Future[(ResponseT, ResponseT)] =
       Future {
         val request    = requestGen(rand)(p)
@@ -53,7 +61,9 @@ object TestEngine {
                                                      read: Read[A],
                                                      state: TestState,
                                                      diffLimit: Int)
-                                                    (implicit gen: LabelledGeneric.Aux[A, H], genDiff: Lazy[GenericDiff[H]]): TestState = {
+                                                    (implicit gen: LabelledGeneric.Aux[A, H],
+                                                              genDiff: Lazy[GenericDiff[H]],
+                                                              comp: Compare[A] = Compare.default[A]): TestState = {
     def addReasons(reason: Diff): Seq[Diff] =
       if (state.reasons.length >= diffLimit)
         state.reasons
