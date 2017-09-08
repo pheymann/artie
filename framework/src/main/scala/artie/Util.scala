@@ -1,12 +1,12 @@
 package artie
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.Future
 
 object Util {
 
   case class LazyCheck(run: () => Future[TestState])
 
-  def runSpec(spec: suite.RefactoringSpec)(implicit ec: ExecutionContext): Future[TestState] = {
+  def runSpec(spec: suite.RefactoringSpec): Future[TestState] = {
     import spec._
 
     println(s"testing refactorings for $service:")

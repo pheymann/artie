@@ -5,7 +5,6 @@ import artie._
 import artie.Util._
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 abstract class RefactoringSuite {

@@ -7,16 +7,19 @@ import shapeless._
 
 import scala.util.Random
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.global
 
 abstract class RefactoringSpec(val service: String) {
+
+  implicit val ec = global
 
   var isSequential = true
 
   def parallel: Unit = isSequential = false
 
   val checks = Seq.newBuilder[(String, LazyCheck)]
-  protected val rand   = new Random(System.currentTimeMillis())
+
+  protected val rand = new Random(System.currentTimeMillis())
 
   def check[P <: HList, A, H <: HList](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
                                       (f: Random => P => RequestT)

@@ -5,7 +5,7 @@ import artie.implicits._
 
 import util._
 
-object RandomProviderSpec extends RefactoringSpec("random-provider") {
+object RandomProviderSpec extends suite.RefactoringSpec("random-provider") {
 
   import PlayJsonToRead._
 

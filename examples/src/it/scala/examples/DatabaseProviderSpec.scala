@@ -2,9 +2,10 @@ package examples
 
 import artie._
 import artie.implicits._
+
 import util._
 
-object DatabaseProviderSpec extends RefactoringSpec("database-provider") {
+object DatabaseProviderSpec extends suite.RefactoringSpec("database-provider") {
 
   import PlayJsonToRead._
 
