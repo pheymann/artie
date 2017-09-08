@@ -94,7 +94,7 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         succServerA1.stop(),
         succServerA2.stop(),
         succServerB.stop(),
-        failedServer.stop(),
+        failedServer.stop()
       ))
 
       Await.ready(unbindsF.map(_ => system.terminate()), 5.seconds)
