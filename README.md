@@ -130,11 +130,13 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is able to compare:
+Currently the framework is able to provide detailed compare-results for:
   - simple case classes
   - nested case classes
   - sequences of primitives or case classes
   - maps of primitives or case classes
+
+Everythings else will be compare by `!=` and completely reported on failure.
 
 If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
 
@@ -174,17 +176,19 @@ Provides data from a Database query:
 
 ```Scala
 // provide a query (add a LIMIT as all data is eagerly loaded)!
-provide[Long].database("select id from users limit 100", dbConfig)
+provide[Long].database("select id from users limit 100", db)
 
 // or randomly select elements
-provide[Long].database.random("users", "id", 100, dbConfig)
+provide[Long].database.random("users", "id", 100, db)
 ```
 
-##### Database Configuration
- - `database`: an instance of [Database](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/DataGenerator.scala#L30-L35), currently only `mysql` but can easily created for other DBs
- - `host`: host machine of the DB
- - `user`: database user
- - `password`: database user password
+##### Database
+Currently provided are `mysql` and `h2` and have to be used like this:
+
+```Scala
+val db0 = mysql(<host>, <user>, <password>)
+val db1 = h2(<host>, <user>, <password>)
+```
 
 ### TestConfig
 Mandatory informations:
@@ -227,11 +231,11 @@ get(???, p)
 You can add your Database as easy as this:
 
 ```Scala
-object mysql extends Database {
+trait Mysql extends Database {
 
   val driver = "com.mysql.jdbc.Driver"
 
-  def qualifiedHost(host: String) = "jdbc:mysql://"
+  def qualifiedHost = "jdbc:mysql://" + host
 
   def randomQuery(table: String, column: String, limit: Int): String =
     s"""SELECT DISTINCT t.$column
@@ -239,6 +243,15 @@ object mysql extends Database {
        |ORDER BY RAND()
        |LIMIT $limit
        |""".stripMargin  
+}
+
+object Mysql {
+
+  def apply(_host: String, _user: String, _password: String) = new Mysql {
+    val host = _host
+    val user = _user
+    val password = _password
+  }
 }
 ```
 ### Ignore Response Fields
