@@ -11,8 +11,8 @@ trait DataSelector[A] {
   def next(implicit rand: Random): A
 
   final def nextOpt(implicit rand: Random, exists: Rand[Unit, Boolean]): Option[A] =
-    if (exists(rand)(Unit)) Some(next)
-    else                    None
+    if (exists(rand)(())) Some(next)
+    else                  None
 
   @tailrec
   final def nextSeq(length: Int, acc: Seq[A] = Nil)(implicit rand: Random): Seq[A] = 

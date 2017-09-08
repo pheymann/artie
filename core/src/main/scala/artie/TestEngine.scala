@@ -77,8 +77,8 @@ object TestEngine {
     }
     else {
       val stateE = for {
-        baseA <- read(base.body)
-        refA  <- read(refactored.body)
+        baseA <- Either.RightProjection(read(base.body))
+        refA  <- Either.RightProjection(read(refactored.body))
       } yield {
         val differences = GenericDiffOps.diff(baseA, refA)
 
