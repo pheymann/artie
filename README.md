@@ -86,7 +86,9 @@ cd artie
 sbt "publishLocal"
 ```
 
-But I will push it to Maven as fast as possible.
+In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
+
+ ! I will push all artifacts to Maven as fast as possible. !
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
