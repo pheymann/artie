@@ -34,14 +34,14 @@ final class DataSelectorOps[A] {
 
   import DatabaseGenerator._
 
-  def database(query: String, config: DatabaseConfig)
+  def database(query: String, db: Database)
               (implicit gen: DatabaseGenerator[A], ec: ExecutionContext, randF: Rand[Int, Int]): Future[DataSelector[A]] =
-    Future(static(gen(query, config): _*))
+    Future(static(gen(query, db): _*))
 
   object database {
 
-    def random(table: String, column: String, limit: Int, config: DatabaseConfig)
+    def random(table: String, column: String, limit: Int, db: Database)
               (implicit gen: DatabaseGenerator[A], ec: ExecutionContext, randF: Rand[Int, Int]): Future[DataSelector[A]] =
-      Future(static(gen(config.database.randomQuery(table, column, limit), config): _*))
+      Future(static(gen(db.randomQuery(table, column, limit), db): _*))
   }
 }

@@ -15,13 +15,14 @@ object Util {
       if (isSequential) {
         def runInSequence(remaining: Seq[(String, LazyCheck)], acc: Seq[(String, TestState)]): Future[Seq[(String, TestState)]] = remaining match {
           case (endpoint, check) +: tail =>
-            println(s"  + check $endpoint")
+            println(s" + check $endpoint")
 
             check.run().flatMap { state =>
               if (state.isFailed)
-                println("    failed with:")
+                println("   failed with:")
 
-              printReasons(state)              
+              printReasons(state)
+              println("")
               runInSequence(tail, (endpoint -> state) +: acc)
             }
 
@@ -33,7 +34,7 @@ object Util {
       else {
         val stateFs = checks.result().map {
           case (endpoint, check) =>
-            println(s"  + check $endpoint")
+            println(s" + check $endpoint")
 
             check.run().map(state => (endpoint -> state))
         }
@@ -42,7 +43,7 @@ object Util {
 
         statesF.foreach(_.foreach { case (endpoint, state) =>
           if (state.isFailed) {
-            println(s"  - $endpoint failed with :")
+            println(s" - $endpoint failed with :")
             printReasons(state)
           }
         })

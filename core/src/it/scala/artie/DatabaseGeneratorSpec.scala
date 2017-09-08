@@ -6,8 +6,6 @@ import java.sql.ResultSet
 
 final class DatabaseGeneratorSpec extends Specification {
 
-  import DatabaseGenerator._
-
   val createTable =
     """CREATE TABLE test_table (
       |  id INT PRIMARY KEY
@@ -16,11 +14,11 @@ final class DatabaseGeneratorSpec extends Specification {
   val insertRows =
     "INSERT INTO test_table (id) VALUES (0)"
 
-  val config = DatabaseConfig(Util.h2, "", "user", "pwd")
+  val db = h2("mem:test_db;DB_CLOSE_DELAY=-1;MODE=MySQL", "user", "pwd")
 
   "DatabaseGenerator" >> {
     step {
-      Util.prepare(config, Seq(createTable, insertRows))
+      Util.prepare(db, Seq(createTable, insertRows))
     }
 
     "run queries against a given database with a new connection" >> {
@@ -28,7 +26,7 @@ final class DatabaseGeneratorSpec extends Specification {
         rows.getInt(1)
       }
 
-      runQuery("select * from test_table", config)(mapper) === Seq(0)
+      DatabaseGenerator.runQuery("select * from test_table", db)(mapper) === Seq(0)
     }
   }
 }

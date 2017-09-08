@@ -6,24 +6,8 @@ object Util {
 
   import DatabaseGenerator._
 
-  object h2 extends Database {
-
-    val driver = "org.h2.Driver"
-
-    def qualifiedHost(host: String) = "jdbc:h2:mem:test_db;DB_CLOSE_DELAY=-1;MODE=MySQL"
-
-    def randomQuery(table: String, column: String, limit: Int): String =
-      s"""SELECT DISTINCT t.$column
-          |FROM $table AS t
-          |ORDER BY RAND()
-          |LIMIT $limit
-          |""".stripMargin
-  }
-
-  def prepare(config: DatabaseConfig, queries: Seq[String]): Unit = {
-    import config._
-
-    Class.forName(database.driver)
+  def prepare(db: Database, queries: Seq[String]): Unit = {
+    Class.forName(db.driver)
 
     def withPrepared(conn: Connection): Unit =
       try {
@@ -41,6 +25,6 @@ object Util {
         conn.close()
       }
 
-    withPrepared(DriverManager.getConnection(database.qualifiedHost(host), user, password))
+    withPrepared(DriverManager.getConnection(db.qualifiedHost, db.user, db.password))
   }
 }

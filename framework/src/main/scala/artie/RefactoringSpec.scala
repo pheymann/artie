@@ -3,10 +3,12 @@ package artie
 import Util._
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration._
 
 abstract class RefactoringSpec(_service: String) extends suite.RefactoringSpec(_service) {
+
+  implicit val ec = global
 
   def waitTimeout = 10.minutes
 

@@ -1,4 +1,6 @@
 
+import artie.instances.DatabaseInstanceOps
+
 import shapeless._
 import shapeless.ops.record._
 import scalaj.http._
@@ -7,23 +9,7 @@ import scala.util.Random
 import scala.concurrent.{Future, ExecutionContext, Await}
 import scala.concurrent.duration.FiniteDuration
 
-package object artie extends Request with ProviderOps with TestConfigOps with TestStateOps {
-
-  import artie.DatabaseGenerator.Database
-
-  object mysql extends Database {
-
-    val driver = "com.mysql.jdbc.Driver"
-
-    def qualifiedHost(host: String) = "jdbc:mysql://"
-
-    def randomQuery(table: String, column: String, limit: Int): String =
-      s"""SELECT DISTINCT t.$column
-          |FROM $table AS t
-          |ORDER BY RAND()
-          |LIMIT $limit
-          |""".stripMargin
-  }
+package object artie extends Request with ProviderOps with TestConfigOps with DatabaseInstanceOps with TestStateOps {
 
   import artie.DataSelectorOps
 
@@ -48,7 +34,7 @@ package object artie extends Request with ProviderOps with TestConfigOps with Te
 
   def printReasons(state: TestState): Unit =
     if (state.reasons.nonEmpty)
-      println(GenericDiffOps.mkString(state.reasons))
+      println(GenericDiffOps.mkString(state.reasons, "   "))
 
   def printState(state: TestState): Unit = {
     val resultStr = s"Total: ${state.total}, Succeeded: ${state.succeeded}, Invalid: ${state.invalid}, Failed: ${state.failed}" 
