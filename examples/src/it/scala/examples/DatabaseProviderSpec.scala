@@ -9,7 +9,7 @@ object DatabaseProviderSpec extends suite.RefactoringSpec("database-provider") {
 
   import PlayJsonToRead._
 
-  val conf = config("http://localhost", 9000, "http://localhost", 9001)
+  val conf = Config("http://localhost", 9000, "http://localhost", 9001)
   val db   = h2("mem:test_db;DB_CLOSE_DELAY=-1;MODE=MySQL", "user", "password")
 
   DbPreparation.prepare(db)

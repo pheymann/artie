@@ -16,7 +16,7 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
 
   implicit val system = ActorSystem("artie_dsl_it_spec")
 
-  val conf = config("http://localhost", 9000, "http://localhost", 9001)
+  val conf = Config("http://localhost", 9000, "http://localhost", 9001)
     .repetitions(1000)
     .parallelism(5)
     .stopOnFailure(false)
@@ -81,7 +81,7 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
       val state = checkAwait(prs, c, Group.read) { implicit r => p =>
         val id = select('ids, p).next
 
-        put(s"/test/$id", contentO = Some(Json.toJson(Seq(User(26, "Paul"))).toString))
+        put(s"/test/$id", headers = Headers <&> ("Content-Type", "application/json"), contentO = Some(Json.toJson(Seq(User(26, "Paul"))).toString))
       }(1.second)
 
       printReasons(state)

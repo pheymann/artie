@@ -4,16 +4,20 @@ trait Request {
 
   type Params = Map[String, String]
 
-  val params = Map.empty[String, String]
+  val Params = Map.empty[String, String]
 
-  implicit class ParamsOps(params: Params) {
+  type Headers = Map[String, String]
 
-    def <&>[A](key: String, value: A): Params = params + (key -> value.toString)
-    def <&>[A](key: String, values: Seq[A]): Params = params + (key -> values.mkString(","))
+  val Headers = Map.empty[String, String]
 
-    def <&>[A](key: String, valueO: Option[A]): Params = valueO match {
+  implicit class ParamsAndHeadersOps(elements: Map[String, String]) {
+
+    def <&>[A](key: String, value: A): Map[String, String] = elements + (key -> value.toString)
+    def <&>[A](key: String, values: Seq[A]): Map[String, String] = elements + (key -> values.mkString(","))
+
+    def <&>[A](key: String, valueO: Option[A]): Map[String, String] = valueO match {
       case Some(value) => <&>(key, value)
-      case None        => params
+      case None        => elements
     }
   }
 
@@ -24,17 +28,17 @@ trait Request {
   case object Post   extends RequestType
   case object Delete extends RequestType
 
-  type RequestT = (RequestType, String, Params, Option[String])
+  type RequestT = (RequestType, String, Params, Headers, Option[String])
 
-  final def get(uri: String, params: Params = Map.empty): RequestT =
-    (Get, uri, params, None)
+  final def get(uri: String, params: Params = Map.empty, headers: Headers = Headers): RequestT =
+    (Get, uri, params, headers, None)
 
-  final def put(uri: String, params: Params = Map.empty, contentO: Option[String] = None): RequestT =
-    (Put, uri, params, contentO)
+  final def put(uri: String, params: Params = Map.empty, headers: Headers = Headers, contentO: Option[String] = None): RequestT =
+    (Put, uri, params, headers, contentO)
 
-  final def post(uri: String, params: Params = Map.empty, contentO: Option[String] = None): RequestT =
-    (Post, uri, params, contentO)
+  final def post(uri: String, params: Params = Map.empty, headers: Headers = Headers, contentO: Option[String] = None): RequestT =
+    (Post, uri, params, headers, contentO)
 
-  final def delete(uri: String, params: Params = Map.empty): RequestT =
-    (Delete, uri, params, None)
+  final def delete(uri: String, params: Params = Map.empty, headers: Headers = Headers): RequestT =
+    (Delete, uri, params, headers, None)
 }

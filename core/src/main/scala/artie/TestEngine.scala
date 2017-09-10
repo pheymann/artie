@@ -109,18 +109,18 @@ object TestEngine {
   }
 
   private[artie] def toHttpRequest(baseUri: String, request: RequestT): HttpRequest = request match {
-    case (Get, uri, params, _) => Http(baseUri + uri).params(params).method("GET")
+    case (Get, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("GET")
 
-    case (Put, uri, params, contentO) =>
-      val base = Http(baseUri + uri).params(params).header("Content-Type", "application/json")
+    case (Put, uri, params, headers, contentO) =>
+      val base = Http(baseUri + uri).params(params).headers(headers)
 
       contentO.fold(base.method("Pust"))(base.put(_))
 
-    case (Post, uri, params, contentO) =>
-      val base = Http(baseUri + uri).params(params).header("Content-Type", "application/json")
+    case (Post, uri, params, headers, contentO) =>
+      val base = Http(baseUri + uri).params(params).headers(headers)
 
       contentO.fold(base.method("POST"))(base.postData(_))
 
-    case (Delete, uri, params, _) => Http(baseUri + uri).params(params).method("DELETE")
+    case (Delete, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("DELETE")
   }
 }

@@ -11,7 +11,7 @@ object StaticProviderSpec extends suite.RefactoringSpec("static-provider") {
 
   import PlayJsonToRead._
 
-  val conf = config("http://localhost", 9000, "http://localhost", 9001)
+  val conf = Config("http://localhost", 9000, "http://localhost", 9001)
 
   val providers = Providers ~
     ('ids, provide[Long].static(0L, 1L, 2L)) ~
@@ -27,6 +27,6 @@ object StaticProviderSpec extends suite.RefactoringSpec("static-provider") {
     val id   = select('ids, p).next
     val user = select('users, p).next
 
-    post(s"/user/$id", contentO = Some(Json.toJson(user).toString))
+    post(s"/user/$id", headers = Headers <&> ("Content-Type", "application/json"), contentO = Some(Json.toJson(user).toString))
   }  
 }
