@@ -9,7 +9,7 @@ object RandomProviderSpec extends suite.RefactoringSpec("random-provider") {
 
   import PlayJsonToRead._
 
-  val conf = config("http://localhost", 9000, "http://localhost", 9001)
+  val conf = Config("http://localhost", 9000, "http://localhost", 9001)
 
   val providers = Providers ~
     ('ids, provide[Int].random(10, 100))

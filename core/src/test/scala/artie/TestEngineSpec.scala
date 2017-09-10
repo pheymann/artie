@@ -26,8 +26,8 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
   "TestEngine" >> {
     "RequestT to HttpRequest" >> {
       toHttpRequest("base", get("/uri")) === Http("base/uri")
-      toHttpRequest("base", post("/uri", contentO = Some("content"))) === Http("base/uri").postData("content").header("Content-Type", "application/json")
-      toHttpRequest("base", put("/uri", contentO = Some("content"))) === Http("base/uri").put("content").header("Content-Type", "application/json")
+      toHttpRequest("base", post("/uri", contentO = Some("content"))) === Http("base/uri").postData("content")
+      toHttpRequest("base", put("/uri", contentO = Some("content"))) === Http("base/uri").put("content")
       toHttpRequest("base", delete("/uri")) === Http("base/uri").method("DELETE")
     }
 
@@ -59,7 +59,7 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
       import shapeless._
       import scala.util.Random
 
-      val conf = config("base", 0, "ref", 1)
+      val conf = Config("base", 0, "ref", 1)
 
       val prov0 = provide[Unit].static(())
       val provs = Providers ~ ('ignore, prov0)

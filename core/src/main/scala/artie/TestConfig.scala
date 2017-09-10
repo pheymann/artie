@@ -15,7 +15,7 @@ final case class TestConfig(baseHost: String,
 
 trait TestConfigOps {
 
-  def config(baseHost: String, basePort: Int, refactoredHost: String, refactoredPort: Int) = TestConfig(
+  def Config(baseHost: String, basePort: Int, refactoredHost: String, refactoredPort: Int) = TestConfig(
     baseHost,
     basePort,
     refactoredHost,

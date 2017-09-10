@@ -51,9 +51,20 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "create a Map of request parameters" >> {
-      params === Map.empty[String, String]
+      Params === Map.empty[String, String]
 
-      params <&> ("0", "hello") <&> ("1", 10) <&> ("2", Some(true)) <&> ("2.1", None)  <&> ("3", Seq(1, 2, 3)) === Map(
+      Params <&> ("0", "hello") <&> ("1", 10) <&> ("2", Some(true)) <&> ("2.1", None)  <&> ("3", Seq(1, 2, 3)) === Map(
+        "0" -> "hello",
+        "1" -> "10",
+        "2" -> "true",
+        "3" -> "1,2,3"
+      )
+    }
+
+    "create a Map of request headers" >> {
+      Headers === Map.empty[String, String]
+
+      Headers <&> ("0", "hello") <&> ("1", 10) <&> ("2", Some(true)) <&> ("2.1", None)  <&> ("3", Seq(1, 2, 3)) === Map(
         "0" -> "hello",
         "1" -> "10",
         "2" -> "true",
@@ -62,15 +73,15 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "create requests" >> {
-      get("uri", params) === (Get, "uri", Map.empty, None)
-      put("uri", params, None) === (Put, "uri", Map.empty, None)
-      post("uri", params, None) === (Post, "uri", Map.empty, None)
-      delete("uri", params) === (Delete, "uri", Map.empty, None)
+      get("uri") === (Get, "uri", Map.empty, Map.empty, None)
+      put("uri") === (Put, "uri", Map.empty, Map.empty, None)
+      post("uri") === (Post, "uri", Map.empty, Map.empty, None)
+      delete("uri") === (Delete, "uri", Map.empty, Map.empty, None)
     }
 
     "create TestConfig" >> {
-      config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1)
-      config("base", 0, "ref", 1)
+      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1)
+      Config("base", 0, "ref", 1)
         .parallelism(10)
         .repetitions(100)
         .stopOnFailure(false)
@@ -84,13 +95,13 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
 
       val pr0 = provide[Int].static(0)
 
-      check(Providers ~ ('a, pr0), config("base", 0, "ref", 0), read, null, _ => HttpResponse("hello", 200, Map())) { implicit r => p =>
+      check(Providers ~ ('a, pr0), Config("base", 0, "ref", 0), read, null, _ => HttpResponse("hello", 200, Map())) { implicit r => p =>
         val a = select('a, p).next(r)
 
         get(s"/uri/$a")
       } must beEqualTo(TestState(1, 0, 0)).awaitFor(1.second)
 
-      checkAwait(Providers ~ ('a, pr0), config("base", 0, "ref", 0), read, null, _ => HttpResponse("hello", 200, Map())) { implicit r => p =>
+      checkAwait(Providers ~ ('a, pr0), Config("base", 0, "ref", 0), read, null, _ => HttpResponse("hello", 200, Map())) { implicit r => p =>
         val a = select('a, p).next(r)
 
         get(s"/uri/$a")
