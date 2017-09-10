@@ -26,8 +26,8 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
   "TestEngine" >> {
     "RequestT to HttpRequest" >> {
       toHttpRequest("base", get("/uri")) === Http("base/uri")
-      toHttpRequest("base", post("/uri", contentO = Some("content"))) === Http("base/uri").postData("content").header("Content-Type", "application/json")
-      toHttpRequest("base", put("/uri", contentO = Some("content"))) === Http("base/uri").put("content").header("Content-Type", "application/json")
+      toHttpRequest("base", post("/uri", contentO = Some("content"))) === Http("base/uri").postData("content")
+      toHttpRequest("base", put("/uri", contentO = Some("content"))) === Http("base/uri").put("content")
       toHttpRequest("base", delete("/uri")) === Http("base/uri").method("DELETE")
     }
 
