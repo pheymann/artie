@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/pheymann/artie.svg?branch=master)](https://travis-ci.org/pheymann/artie)
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
-### ! This is a prototype and some stuff may not be working properly yet !
 You want to change a (legacy) REST service which has no tests and it is impossible to
 write some without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
