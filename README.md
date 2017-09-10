@@ -18,7 +18,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
 
   // give some informations
   val conf = config("old-host", 8080, "new-host", 8080)
-  val dbConf = DatabaseConfig(mysql, "db-host", "user", "pwd")
+  val db   = mysql("db-host", "user", "pwd")
 
   // add some data
   val providers = Providers ~
@@ -26,7 +26,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
     ('ages, provide[Int].random(10, 100) ~
 
     // some user ids from a db
-    ('userIds, provide[Long].database.random("users_table", "user_id", limit = 100, dbConf)
+    ('userIds, provide[Long].database.random("users_table", "user_id", limit = 100, db)
 
   // you have to provide `read` (see below)
   check("get-user", providers, conf, read[User]) { implicit r => p =>
@@ -101,7 +101,7 @@ They are called `Read`s and implemented like this:
 
 ```Scala
 // by hand
-implicit val userRead = new Read[User] {
+val userRead = new Read[User] {
   def apply(json: String): Either[String, User] = ???
 }
 
