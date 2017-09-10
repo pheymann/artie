@@ -64,7 +64,7 @@ testing refactorings for my-service:
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 ```
 
-For some examples take a look into the [here](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/examples).
+For some examples take a look [here](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/examples).
 
 ## Table of Contents
  - [Get This Framework](#get-this-framework)
