@@ -1,7 +1,7 @@
 import sbt.Keys._
 
 lazy val commonSettings = Seq(
-  version       := "0.1.0",
+  version       := "0.1.0-RC1",
   scalaVersion  := "2.11.11",
   scalacOptions ++= Seq(
     "-deprecation",
