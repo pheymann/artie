@@ -18,7 +18,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
 
   // give some informations
   val conf = config("old-host", 8080, "new-host", 8080)
-  val dbConf = DatabaseConfig(mysql, "db-host", "user", "pwd")
+  val db   = mysql("db-host", "user", "pwd")
 
   // add some data
   val providers = Providers ~
@@ -26,7 +26,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
     ('ages, provide[Int].random(10, 100) ~
 
     // some user ids from a db
-    ('userIds, provide[Long].database.random("users_table", "user_id", limit = 100, dbConf)
+    ('userIds, provide[Long].database.random("users_table", "user_id", limit = 100, db)
 
   // you have to provide `read` (see below)
   check("get-user", providers, conf, read[User]) { implicit r => p =>
@@ -64,7 +64,7 @@ testing refactorings for my-service:
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 ```
 
-For some examples take a look into the [integration tests](https://github.com/pheymann/artie/tree/master/core/src/it/scala/artie) or [examples](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/single).
+For some examples take a look [here](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/examples).
 
 ## Table of Contents
  - [Get This Framework](#get-this-framework)
@@ -86,7 +86,9 @@ cd artie
 sbt "publishLocal"
 ```
 
-But I will push it to Maven as fast as possible.
+In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
+
+ ! I will push all artifacts to Maven as fast as possible. !
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
@@ -99,7 +101,7 @@ They are called `Read`s and implemented like this:
 
 ```Scala
 // by hand
-implicit val userRead = new Read[User] {
+val userRead = new Read[User] {
   def apply(json: String): Either[String, User] = ???
 }
 
@@ -128,11 +130,13 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is able to compare:
+Currently the framework is able to provide detailed compare-results for:
   - simple case classes
   - nested case classes
   - sequences of primitives or case classes
   - maps of primitives or case classes
+
+Everythings else will be compare by `!=` and completely reported on failure.
 
 If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
 
@@ -172,17 +176,19 @@ Provides data from a Database query:
 
 ```Scala
 // provide a query (add a LIMIT as all data is eagerly loaded)!
-provide[Long].database("select id from users limit 100", dbConfig)
+provide[Long].database("select id from users limit 100", db)
 
 // or randomly select elements
-provide[Long].database.random("users", "id", 100, dbConfig)
+provide[Long].database.random("users", "id", 100, db)
 ```
 
-##### Database Configuration
- - `database`: an instance of [Database](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/DataGenerator.scala#L30-L35), currently only `mysql` but can easily created for other DBs
- - `host`: host machine of the DB
- - `user`: database user
- - `password`: database user password
+##### Database
+Currently provided are `mysql` and `h2` and have to be used like this:
+
+```Scala
+val db0 = mysql(<host>, <user>, <password>)
+val db1 = h2(<host>, <user>, <password>)
+```
 
 ### TestConfig
 Mandatory informations:
@@ -225,11 +231,11 @@ get(???, p)
 You can add your Database as easy as this:
 
 ```Scala
-object mysql extends Database {
+trait Mysql extends Database {
 
   val driver = "com.mysql.jdbc.Driver"
 
-  def qualifiedHost(host: String) = "jdbc:mysql://"
+  def qualifiedHost = "jdbc:mysql://" + host
 
   def randomQuery(table: String, column: String, limit: Int): String =
     s"""SELECT DISTINCT t.$column
@@ -237,6 +243,15 @@ object mysql extends Database {
        |ORDER BY RAND()
        |LIMIT $limit
        |""".stripMargin  
+}
+
+object Mysql {
+
+  def apply(_host: String, _user: String, _password: String) = new Mysql {
+    val host = _host
+    val user = _user
+    val password = _password
+  }
 }
 ```
 ### Ignore Response Fields

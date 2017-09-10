@@ -20,7 +20,7 @@ trait DatabaseGenerator[A] extends DataGenerator {
 
   import DatabaseGenerator._
 
-  def apply(query: String, config: DatabaseConfig): Seq[A]
+  def apply(query: String, db: Database): Seq[A]
 }
 
 object DatabaseGenerator {
@@ -28,16 +28,15 @@ object DatabaseGenerator {
   trait Database {
 
     def driver: String
-    def qualifiedHost(host: String): String
+    def host: String
+    def user: String
+    def password: String
+    def qualifiedHost: String
     def randomQuery(table: String, column: String, limit: Int): String
   }
 
-  final case class DatabaseConfig(database: Database, host: String, user: String, password: String)
-
-  def runQuery[A](query: String, config: DatabaseConfig)(f: ResultSet => A): Seq[A] = {
-    import config._
-
-    Class.forName(database.driver)
+  def runQuery[A](query: String, db: Database)(f: ResultSet => A): Seq[A] = {
+    Class.forName(db.driver)
 
     def withStatement(stmt: Statement): Seq[A] =
       try {
@@ -61,6 +60,6 @@ object DatabaseGenerator {
         conn.close()
       }
 
-    withConnection(DriverManager.getConnection(database.qualifiedHost(host), user, password))
+    withConnection(DriverManager.getConnection(db.qualifiedHost, db.user, db.password))
   }
 }

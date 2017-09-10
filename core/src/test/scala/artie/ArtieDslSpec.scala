@@ -1,7 +1,7 @@
 package artie
 
 import artie.RandomGenerator.Rand
-import artie.DatabaseGenerator.DatabaseConfig
+import artie.DatabaseGenerator.Database
 import artie.instances.RandomGeneratorInstances
 
 import org.specs2.mutable.Specification
@@ -22,7 +22,7 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
   implicit val testRand1: Rand[Unit, Double] = _ => _ => 0.5
 
   implicit val testDbGen = new DatabaseGenerator[Int] {
-    def apply(query: String, config: DatabaseConfig) = Seq(1, 2, 3)
+    def apply(query: String, db: Database) = Seq(1, 2, 3)
   }
 
   implicit val random: Random = null
