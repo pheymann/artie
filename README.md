@@ -19,7 +19,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
   import DatabaseGenerator.DatabaseConfig
 
   // give some informations
-  val conf = config("old-host", 8080, "new-host", 8080)
+  val conf = Config("old-host", 8080, "new-host", 8080)
   val db   = mysql("db-host", "user", "pwd")
 
   // add some data
@@ -36,7 +36,7 @@ object MyServiceRefactoring extends RefactoringSpec("my-service") {
     val ageO   = select('ages, p).nextOpt
 
     // request builder
-    get(s"/user/$userId", params <&> ("age", ageO))
+    get(s"/user/$userId", Params <&> ("age", ageO))
   }
 }
 ```
@@ -90,7 +90,7 @@ sbt "publishLocal"
 
 In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
 
- ! I will push all artifacts to Maven as fast as possible. !
+ ! Release is in process. !
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
@@ -215,18 +215,19 @@ You can create:
 requests by calling:
 
 ```Scala
-get(<url>, <query-params>)
+get(<url>, <query-params>, <headers>)
 
-post((<url>, <query-params>, Some(<json-string>))
+post((<url>, <query-params>, <headers>, Some(<json-string>))
 ```
 
-#### Query Parameter
-If you need query params use:
+#### Query Parameter and Headers
+If you need query params or headers use:
 
 ```Scala
-val p = params <&> ("a", 1) <&> ("b", Some(0)) <&> ("c", Seq(1, 2, 3))
+val p = Params <&> ("a", 1) <&> ("b", Some(0)) <&> ("c", Seq(1, 2, 3))
+val h = Headers <&> ("Content-Type", "application/json")
 
-get(???, p)
+post(???, p, h, Some("""{"id": 0}"""))
 ```
 
 ### Add your Database
