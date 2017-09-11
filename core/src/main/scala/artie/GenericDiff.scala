@@ -288,10 +288,6 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
   }
 }
 
-final case class TextDiff(text: String) extends Diff {
-  def stringify(ind: String) = ind + text
-}
-
 object GenericDiffOps {
 
   def diff[A, H <: HList](l: A, r: A)(implicit gen: LabelledGeneric.Aux[A, H],

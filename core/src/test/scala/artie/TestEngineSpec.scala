@@ -34,24 +34,25 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
     "compare HttpResponses from base and refactored" >> {
       val initState = TestState(0, 0, 0)
 
+      val req   = get("/test")
       val resp0 = HttpResponse("John,10", 200, Map.empty)
       val resp1 = HttpResponse("Jo,20", 200, Map.empty)
 
-      compareResponses(resp0, resp0, read, initState, 1) === TestState(1, 0, 0)
-      compareResponses(resp0.copy(code = 404), resp0.copy(code = 500), read, initState, 1) === TestState(0, 1, 0, Seq(
-        TextDiff("invalid:\n  HttpResponse(John,10,404,Map())\n  HttpResponse(John,10,500,Map())"))
+      compareResponses(req, resp0, resp0, read, initState, 1) === TestState(1, 0, 0)
+      compareResponses(req, resp0.copy(code = 404), resp0.copy(code = 500), read, initState, 1) === TestState(0, 1, 0, Seq(
+        ResponseCodeDiff(req, "invalid:\n  HttpResponse(John,10,404,Map())\n  HttpResponse(John,10,500,Map())"))
       )
-      compareResponses(resp0.copy(code = 404), resp0, read, initState, 1) === TestState(0, 0, 1, Seq(
-        TextDiff("base service status error:\n  HttpResponse(John,10,404,Map())"))
+      compareResponses(req, resp0.copy(code = 404), resp0, read, initState, 1) === TestState(0, 0, 1, Seq(
+        ResponseCodeDiff(req, "base service status error:\n  HttpResponse(John,10,404,Map())"))
       )
-      compareResponses(resp0, resp0.copy(code = 404), read, initState, 1) === TestState(0, 0, 1, Seq(
-        TextDiff("refactored service status error:\n  HttpResponse(John,10,404,Map())"))
+      compareResponses(req, resp0, resp0.copy(code = 404), read, initState, 1) === TestState(0, 0, 1, Seq(
+        ResponseCodeDiff(req, "refactored service status error:\n  HttpResponse(John,10,404,Map())"))
       )
-      compareResponses(resp0, resp1, read, initState, 1).copy(reasons = Nil) === TestState(0, 0, 1, Nil)
+      compareResponses(req, resp0, resp1, read, initState, 1).copy(reasons = Nil) === TestState(0, 0, 1, Nil)
 
-      val previousState = TestState(0, 0, 1, Seq(TextDiff("base service status error:\n  HttpResponse(John,10,404,Map())")))
-      compareResponses(resp0.copy(code = 405), resp0, read, previousState, 1) === TestState(0, 0, 2, Seq(
-        TextDiff("base service status error:\n  HttpResponse(John,10,404,Map())"))
+      val previousState = TestState(0, 0, 1, Seq(ResponseCodeDiff(req, "base service status error:\n  HttpResponse(John,10,404,Map())")))
+      compareResponses(req, resp0.copy(code = 405), resp0, read, previousState, 1) === TestState(0, 0, 2, Seq(
+        ResponseCodeDiff(req, "base service status error:\n  HttpResponse(John,10,404,Map())"))
       )
     }
 

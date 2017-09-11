@@ -30,6 +30,21 @@ trait Request {
 
   type RequestT = (RequestType, String, Params, Headers, Option[String])
 
+  def show(request: RequestT): String = {
+    val (_type, url, params, headers, contentO) = request
+
+    val paramsStr  = params.map { case (k, v) => s"$k=$v" }.mkString("&")
+    val headersStr = headers.map { case (k, v) => s"$k=$v" }.mkString(",")
+
+    s"${_type.toString} $url" + {
+      if (params.nonEmpty) "?" + paramsStr
+      else                 ""
+    } + {
+      if (headers.nonEmpty) s" (headers = $headersStr)"
+      else                  ""
+    } + contentO.fold("")(c => s": $c")
+  }
+
   final def get(uri: String, params: Params = Map.empty, headers: Headers = Headers): RequestT =
     (Get, uri, params, headers, None)
 

@@ -18,9 +18,6 @@ object Util {
             println(s" + check $endpoint")
 
             check.run().flatMap { state =>
-              if (state.isFailed)
-                println("   failed with:")
-
               printReasons(state)
               println("")
               runInSequence(tail, (endpoint -> state) +: acc)
