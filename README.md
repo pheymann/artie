@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/pheymann/artie.svg?branch=master)](https://travis-ci.org/pheymann/artie)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12)
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
 You want to change a (legacy) REST service which has no tests and it is impossible to
@@ -79,7 +80,13 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
  - [Ignore Response Fields](#ignore-response-fields)
 
 ### Get This Framework
-As this is still WIP you can only clone and build it:
+You can add it as dependency for Scala **2.11** and **2.12**:
+
+```Scala
+libraryDependencies += "com.github.pheymann" %% "artie" % "0.1.0-RC1" % Test
+```
+
+or build it locally:
 
 ```
 git clone https://github.com/pheymann/artie.git
@@ -88,8 +95,6 @@ sbt "publishLocal"
 ```
 
 In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
-
- ! Release is in process. !
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
