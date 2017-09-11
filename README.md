@@ -80,7 +80,13 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
  - [Ignore Response Fields](#ignore-response-fields)
 
 ### Get This Framework
-As this is still WIP you can only clone and build it:
+You can add it as dependency for Scala **2.11** and **2.12**:
+
+```Scala
+libraryDependencies += "com.github.pheymann" %% "artie" % "0.1.0-RC1" % Test
+```
+
+or build it locally:
 
 ```
 git clone https://github.com/pheymann/artie.git
