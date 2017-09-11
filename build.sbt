@@ -1,6 +1,7 @@
 import sbt.Keys._
 
 lazy val commonSettings = Seq(
+  organization  := "com.github.pheymann",
   version       := "0.1.0-RC1",
   scalaVersion  := "2.11.11",
   scalacOptions ++= Seq(
@@ -27,7 +28,8 @@ lazy val commonSettings = Seq(
 
 lazy val mavenSettings = Seq(
   sonatypeProfileName := "pheymann",
-  pomExtra in Global := {
+  publishMavenStyle   := true,
+  pomExtra in Global  := {
     <url>https://github.com/pheymann/artie</url>
       <licenses>
         <license>
