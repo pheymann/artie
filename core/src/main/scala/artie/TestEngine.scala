@@ -45,6 +45,9 @@ object TestEngine {
             compareResponses(base, refactored, read, accState, config.diffLimit)
           }
 
+          if (config.showProgress)
+            print(s"\r   processed: ${newState.total} / ${config.repetitions}")
+
           engine(p, newState)
         }
       }
@@ -52,8 +55,10 @@ object TestEngine {
         Future.successful(state)
     }
 
-
-    pf.flatMap(engine(_, TestState(0, 0, 0)))
+    pf.flatMap(engine(_, TestState(0, 0, 0))).andThen { case _ =>      
+      if (config.showProgress)
+        print("\n")
+    }
   }
 
   private[artie] def compareResponses[A, H <: HList](base: HttpResponse[String],
