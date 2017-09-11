@@ -57,8 +57,9 @@ sbt "it:runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
-    failed with:
-
+    processed: 1 / 1
+    
+    Get /user/0?age=20
     {
       age: 10 != 20
     }
@@ -136,11 +137,12 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is able to provide detailed compare-results for:
-  - simple case classes
-  - nested case classes
-  - sequences of primitives or case classes
-  - maps of primitives or case classes
+Currently the framework is able to provide detailed compare-results (fields with values) for:
+  - simple case classes (`case class User(id: Long, name: String`)
+  - nested case classes (`case class Friendship(base: User, friend: User)`)
+  - sequences, sets and arrays of case classes (`case class Group(members: Set[User])`)
+  - maps of case classes (`case class UserTopic(topics: Map[Topic, User])`)
+  - combination of these
 
 Everythings else will be compare by `!=` and completely reported on failure.
 
