@@ -96,8 +96,6 @@ sbt "publishLocal"
 
 In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
 
- ! Release is in process. !
-
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
   - [shapeless](https://github.com/milessabin/shapeless/)
