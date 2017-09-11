@@ -2,7 +2,7 @@ import sbt.Keys._
 
 lazy val commonSettings = Seq(
   organization  := "com.github.pheymann",
-  version       := "0.1.0-RC1",
+  version       := "0.1.0-RC2",
   scalaVersion  := "2.12.3",
   scalacOptions ++= Seq(
     "-deprecation",
