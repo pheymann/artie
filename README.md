@@ -61,7 +61,7 @@ testing refactorings for my-service:
     
     Get /user/0?age=20
     {
-      age: 10 != 20
+      city: "Hamburg" != "New York"
     }
 
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
