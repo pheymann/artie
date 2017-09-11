@@ -80,12 +80,12 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "create TestConfig" >> {
-      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1)
+      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1, true)
       Config("base", 0, "ref", 1)
         .parallelism(10)
         .repetitions(100)
         .stopOnFailure(false)
-        .shownDiffsLimit(10) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10)
+        .shownDiffsLimit(10) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10, true)
     }
 
     "create test case" >> {
