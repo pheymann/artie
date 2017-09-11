@@ -80,12 +80,12 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "create TestConfig" >> {
-      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1)
+      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1, true)
       Config("base", 0, "ref", 1)
         .parallelism(10)
         .repetitions(100)
         .stopOnFailure(false)
-        .shownDiffsLimit(10) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10)
+        .shownDiffsLimit(10) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10, true)
     }
 
     "create test case" >> {
@@ -129,7 +129,9 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         TotalDiff(diff(grp0, grp1)),
         TotalDiff(diff(grp0, Group(0L, Nil))),
         TotalDiff(diff(usrGrp0, usrGrp1)),
-        TotalDiff(diff(usrGrp0, UserGroups(Map.empty)))
+        TotalDiff(diff(usrGrp0, UserGroups(Map.empty))),
+        TotalDiff(diff(ArrayOfUsers(0L, Array(usr0)), ArrayOfUsers(1L, Array(usr1)))),
+        TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1))))
       )))
 
       implicit val userComp = new Compare[User] {

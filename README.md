@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/pheymann/artie.svg?branch=master)](https://travis-ci.org/pheymann/artie)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12)
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
 You want to change a (legacy) REST service which has no tests and it is impossible to
@@ -56,10 +57,11 @@ sbt "it:runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
-    failed with:
-
+    processed: 1 / 1
+    
+    Get /user/0?age=20
     {
-      age: 10 != 20
+      city: "Hamburg" != "New York"
     }
 
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
@@ -79,7 +81,13 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
  - [Ignore Response Fields](#ignore-response-fields)
 
 ### Get This Framework
-As this is still WIP you can only clone and build it:
+You can add it as dependency for Scala **2.11** and **2.12**:
+
+```Scala
+libraryDependencies += "com.github.pheymann" %% "artie" % "0.1.0-RC1" % Test
+```
+
+or build it locally:
 
 ```
 git clone https://github.com/pheymann/artie.git
@@ -88,8 +96,6 @@ sbt "publishLocal"
 ```
 
 In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
-
- ! Release is in process. !
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
@@ -131,11 +137,12 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is able to provide detailed compare-results for:
-  - simple case classes
-  - nested case classes
-  - sequences of primitives or case classes
-  - maps of primitives or case classes
+Currently the framework is able to provide detailed compare-results (fields with values) for:
+  - simple case classes (`case class User(id: Long, name: String`)
+  - nested case classes (`case class Friendship(base: User, friend: User)`)
+  - sequences, sets and arrays of case classes (`case class Group(members: Set[User])`)
+  - maps of case classes (`case class UserTopic(topics: Map[Topic, User])`)
+  - combination of these
 
 Everythings else will be compare by `!=` and completely reported on failure.
 

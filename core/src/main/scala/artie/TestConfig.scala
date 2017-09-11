@@ -7,7 +7,8 @@ final case class TestConfig(baseHost: String,
                             repetitions: Int,
                             parallelism: Int,
                             stopOnFailure: Boolean,
-                            diffLimit: Int) {
+                            diffLimit: Int,
+                            showProgress: Boolean) {
 
   val base       = s"$baseHost:$basePort"
   val refactored = s"$refactoredHost:$refactoredPort"
@@ -23,7 +24,8 @@ trait TestConfigOps {
     repetitions   = 1,
     parallelism   = 1,
     stopOnFailure = true,
-    diffLimit     = 1
+    diffLimit     = 1,
+    showProgress  = true
   )
 
   implicit class ImplicitTestConfigOps(config: TestConfig) {

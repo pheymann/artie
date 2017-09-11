@@ -77,8 +77,13 @@ final case class TotalDiff(diffs: Seq[Diff]) extends Diff {
   def stringify(ind: String) = s"$ind{" + GenericDiffOps.mkString(diffs, ind + "  ") + s"\n$ind}"
 }
 
-/** Difference of `Seq` elements */
-final case class SeqDiff(name: String, elements: Seq[Diff]) extends Diff {
+/** Difference betwenn collection sizes. */
+final case class CollectionSizeDiff(name: String, sizeL: Int, sizeR: Int) extends Diff {
+  def stringify(ind: String) = s"$ind$name: size: $sizeL != $sizeR"
+}
+
+/** Difference of `Set` elements */
+final case class CollectionElementsDiff(name: String, elements: Seq[Diff]) extends Diff {
   def stringify(ind: String) = s"$ind$name: [" + elements.foldLeft("") { (acc, diff) =>
     s"$acc\n" + diff.stringify(ind + "  ") + ","
   } + s"\n$ind]"
@@ -89,11 +94,6 @@ final case class MapDiff(name: String, keyValues: Seq[(String, Diff)]) extends D
   def stringify(ind: String) = s"$ind$name: {" + keyValues.foldLeft("") { case (acc, (key, diffs)) =>
     s"$acc\n$ind  $key:\n" + diffs.stringify(ind + "    ")
   } + s"\n$ind}"
-}
-
-/** Difference betwenn collection sizes. */
-final case class CollectionSizeDiff(name: String, sizeL: Int, sizeR: Int) extends Diff {
-  def stringify(ind: String) = s"$ind$name: size: $sizeL != $sizeR"
 }
 
 /** Value is missing in the other collection. */
@@ -143,7 +143,88 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
       if (allDiffs.isEmpty)
         sizeDiff ++: genDiffT.value(l.tail, r.tail)
       else
-        sizeDiff ++: (SeqDiff(wit.value.name, allDiffs) +: genDiffT.value(l.tail, r.tail))
+        sizeDiff ++: (CollectionElementsDiff(wit.value.name, allDiffs) +: genDiffT.value(l.tail, r.tail))
+    }
+  }
+
+  // case: LabelledGenerics in an `Array`
+  //  - compares elements in order
+  //  - if the sizes differ it returns also the missing elements
+  implicit def arrayGenDiff[K <: Symbol, V, R <: HList, T <: HList](implicit wit: Witness.Aux[K],
+                                                                             gen: LabelledGeneric.Aux[V, R],
+                                                                             genDiffH: Lazy[GenericDiff[R]],
+                                                                             genDiffT: Lazy[GenericDiff[T]])
+      : GenericDiff[FieldType[K, Array[V]] :: T] = new GenericDiff[FieldType[K, Array[V]] :: T] {
+    def apply(l: HI, r: HI): Seq[Diff] = {
+      val sizeL = l.head.length
+      val sizeR = r.head.length
+
+      // compare sizes
+      val sizeDiff = {
+        if (sizeL != sizeR)
+          Seq(CollectionSizeDiff(wit.value.name, l.head.length, r.head.length))
+        else
+          Seq.empty[Diff]
+      }
+
+      // collect missing elements
+      val missingDiffs = {
+        if (sizeL > sizeR) l.head.slice(sizeR, sizeL).map(MissingValue(_))
+        else               r.head.slice(sizeL, sizeR).map(MissingValue(_))
+      }
+
+      // generate differences between elements
+      val diffs = l.head.zip(r.head)
+        .flatMap { case (valueL, valueR) =>
+          val diffs = genDiffH.value(gen.to(valueL), gen.to(valueR))
+
+          if (diffs.isEmpty) None
+          else               Some(TotalDiff(diffs))
+        }
+
+      val allDiffs = diffs ++: missingDiffs
+
+      if (allDiffs.isEmpty)
+        sizeDiff ++: genDiffT.value(l.tail, r.tail)
+      else
+        sizeDiff ++: (CollectionElementsDiff(wit.value.name, allDiffs) +: genDiffT.value(l.tail, r.tail))
+    }
+  }
+
+  // case: LabelledGenerics in a `Set`
+  //   - if the sizes differ it returns also the missing elements
+  //   - can only provide MissingValue diffs; relation betwenn different elements cannot
+  //     be drawn
+  implicit def setGenDiff[K <: Symbol, V, R <: HList, T <: HList](implicit wit: Witness.Aux[K],
+                                                                           genDiffT: Lazy[GenericDiff[T]])
+      : GenericDiff[FieldType[K, Set[V]] :: T] = new GenericDiff[FieldType[K, Set[V]] :: T] {
+    def apply(l: HI, r: HI): Seq[Diff] = {
+      val sizeL = l.head.size
+      val sizeR = r.head.size
+
+      // compare sizes
+      val sizeDiff = {
+        if (sizeL != sizeR)
+          Seq(CollectionSizeDiff(wit.value.name, sizeL, sizeR))
+        else
+          Seq.empty[Diff]
+      }
+
+      val missingL = l.head.diff(r.head)
+      val missingR = r.head.diff(l.head)
+
+      // collect missing elements
+      val missingDiffs = {
+        val diffL: Seq[Diff] = missingL.map(el => MissingValue(el))(collection.breakOut)
+        val diffR: Seq[Diff] = missingR.map(el => MissingValue(el))(collection.breakOut)
+
+        diffL ++: diffR
+      }
+
+      if (missingDiffs.isEmpty)
+        sizeDiff ++: genDiffT.value(l.tail, r.tail)
+      else
+        sizeDiff ++: (CollectionElementsDiff(wit.value.name, missingDiffs) +: genDiffT.value(l.tail, r.tail))
     }
   }
 
@@ -205,10 +286,6 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
         sizeDiff ++: (MapDiff(wit.value.name, allDiffs) +: genDiffT.value(l.tail, r.tail))
     }
   }
-}
-
-final case class TextDiff(text: String) extends Diff {
-  def stringify(ind: String) = ind + text
 }
 
 object GenericDiffOps {

@@ -9,6 +9,8 @@ final case class Friends(base: User, friend: User)
 final case class Group(id: Long, users: Seq[User])
 final case class UserGroups(groups: Map[String, Group])
 final case class UserGroupsId(groups: Map[Int, Group])
+final case class ArrayOfUsers(id: Long, users: Array[User])
+final case class SetOfUsers(id: Long, users: Set[User])
 
 final class GenericDiffSpec extends Specification {
 
@@ -45,10 +47,10 @@ final class GenericDiffSpec extends Specification {
       diff(Group(0L, Nil), Group(0L, Nil)) === Nil
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr0, usr1))) === Nil
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr0, usr2))) === Seq(
-        SeqDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))
+        CollectionElementsDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))
       )
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr1, usr0))) === Seq(
-        SeqDiff("users", Seq(
+        CollectionElementsDiff("users", Seq(
           TotalDiff(Seq(
             FieldDiff("name", "foo", "bar"),
             FieldDiff("age", 1, 2)
@@ -61,7 +63,33 @@ final class GenericDiffSpec extends Specification {
       )
       diff(Group(0L, Seq(usr0)), Group(0L, Seq(usr0, usr1))) === Seq(
         CollectionSizeDiff("users", 1, 2),
-        SeqDiff("users", Seq(
+        CollectionElementsDiff("users", Seq(
+          MissingValue(usr1)
+        ))
+      )
+    }
+
+    "nested case classes with arrays" >> {
+      diff(ArrayOfUsers(0L, Array(usr0, usr1)), ArrayOfUsers(0L, Array(usr0, usr1))) === Nil
+      diff(ArrayOfUsers(0L, Array(usr0, usr1)), ArrayOfUsers(0L, Array(usr1, usr0))) === Seq(
+        CollectionElementsDiff("users", Seq(
+          TotalDiff(Seq(
+            FieldDiff("name", "foo", "bar"),
+            FieldDiff("age", 1, 2)
+          )),
+          TotalDiff(Seq(
+            FieldDiff("name", "bar", "foo"),
+            FieldDiff("age", 2, 1)
+          ))
+        ))
+      )
+    }
+
+    "nested case classes with sets" >> {
+      diff(SetOfUsers(0L, Set(usr0, usr1)), SetOfUsers(0L, Set(usr1, usr0))) === Nil
+      diff(SetOfUsers(0L, Set(usr0, usr2)), SetOfUsers(0L, Set(usr1, usr0))) === Seq(
+        CollectionElementsDiff("users", Seq(
+          MissingValue(usr2),
           MissingValue(usr1)
         ))
       )
@@ -73,7 +101,7 @@ final class GenericDiffSpec extends Specification {
       diff(UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1)))), UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1))))) === Nil
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Seq(
         MapDiff("groups", Seq(
-          "a" -> TotalDiff(Seq(SeqDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))
+          "a" -> TotalDiff(Seq(CollectionElementsDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))
         ))
       )
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0)))), UserGroups(Map.empty)) === Seq(
