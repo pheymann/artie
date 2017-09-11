@@ -129,7 +129,9 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         TotalDiff(diff(grp0, grp1)),
         TotalDiff(diff(grp0, Group(0L, Nil))),
         TotalDiff(diff(usrGrp0, usrGrp1)),
-        TotalDiff(diff(usrGrp0, UserGroups(Map.empty)))
+        TotalDiff(diff(usrGrp0, UserGroups(Map.empty))),
+        TotalDiff(diff(ArrayOfUsers(0L, Array(usr0)), ArrayOfUsers(1L, Array(usr1)))),
+        TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1))))
       )))
 
       implicit val userComp = new Compare[User] {
