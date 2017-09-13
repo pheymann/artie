@@ -31,15 +31,8 @@ final class GenericDiffSpec extends Specification {
       diff(Friends(usr0, usr1), Friends(usr0, usr2)) === Seq(
         ClassDiff("friend", Seq(FieldDiff("age", 2, 3)))
       )
-    }
 
-    "case class specific comparision" >> {
-      implicit val friendsComp = new Compare[Friends] {
-        def compare(l: Friends, r: Friends): Seq[Option[FieldDiff]] = Seq(
-          diff("base")(l.base, r.base)
-        )
-      }
-
+      implicit val friendsIg = IgnoreFields[Friends].ignore('friend)
       diff(Friends(usr0, usr1), Friends(usr0, usr2)) === Nil
     }
 
@@ -67,6 +60,9 @@ final class GenericDiffSpec extends Specification {
           MissingValue(usr1)
         ))
       )
+
+      implicit val groupIg = IgnoreFields[Group].ignore('users)
+      diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr0, usr2))) === Nil
     }
 
     "nested case classes with arrays" >> {
@@ -83,6 +79,9 @@ final class GenericDiffSpec extends Specification {
           ))
         ))
       )
+
+      implicit val arrayIg = IgnoreFields[ArrayOfUsers].ignore('users)
+      diff(ArrayOfUsers(0L, Array(usr0, usr1)), ArrayOfUsers(0L, Array(usr1, usr0))) === Nil
     }
 
     "nested case classes with sets" >> {
@@ -93,6 +92,9 @@ final class GenericDiffSpec extends Specification {
           MissingValue(usr1)
         ))
       )
+
+      implicit val setIg = IgnoreFields[SetOfUsers].ignore('users)
+      diff(SetOfUsers(0L, Set(usr0, usr2)), SetOfUsers(0L, Set(usr1, usr0))) === Nil
     }
 
     "nested case classes with maps" >> {
@@ -110,6 +112,9 @@ final class GenericDiffSpec extends Specification {
           "a" -> MissingValue(Group(0L, Seq(usr0)))
         ))
       )
+
+      implicit val mapIg = IgnoreFields[UserGroups].ignore('groups)
+      diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Nil
     }
   }
 }

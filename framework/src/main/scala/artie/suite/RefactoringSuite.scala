@@ -25,7 +25,5 @@ abstract class RefactoringSuite {
 
     if (totalState.isFailed)
       System.exit(1)
-    else
-      System.exit(0)
   }
 }

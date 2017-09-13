@@ -22,10 +22,9 @@ lazy val commonSettings = Seq(
     "-Ywarn-inaccessible",
     "-Ywarn-infer-any",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused:implicits",
+ //   "-Ywarn-unused:implicits", -> get errors for implicit evidence
     "-Ywarn-unused:imports",
     "-Ywarn-unused:locals",
-    "-Ywarn-unused:patvars",
     "-Ywarn-unused:privates"
   )
 )

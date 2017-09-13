@@ -16,7 +16,5 @@ abstract class RefactoringSpec(_service: String) extends suite.RefactoringSpec(_
 
     if (totalState.isFailed)
       System.exit(1)
-    else
-      System.exit(0)
   }
 }

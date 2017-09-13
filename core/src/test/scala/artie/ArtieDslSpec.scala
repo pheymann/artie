@@ -134,11 +134,7 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1))))
       )))
 
-      implicit val userComp = new Compare[User] {
-        def compare(l: User, r: User) = Seq(
-          diff("name")(l.name, r.name)
-        )
-      }
+      implicit val userIg = IgnoreFields[User].ignore('age)
 
       printReasons(TestState(0, 0, 1, Seq(
         TotalDiff(diff(usr0, usr1))

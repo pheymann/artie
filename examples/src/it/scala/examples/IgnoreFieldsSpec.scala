@@ -9,12 +9,7 @@ object IgnoreFieldsSpec extends suite.RefactoringSpec("ignore-fields-provider") 
 
   import PlayJsonToRead._
 
-  // ignore the name by not listing it
-  implicit val userComp = new Compare[User] {
-    def compare(l: User, r: User) = Seq(
-      diff("id")(l.id, r.id)
-    )
-  }
+  implicit val ignoreUserName = IgnoreFields[User].ignore('name)
 
   val conf = Config("http://localhost", 9000, "http://localhost", 9001)
 

@@ -29,7 +29,7 @@ object TestEngine {
                                     (implicit ec: ExecutionContext,
                                               gen: LabelledGeneric.Aux[A, H],
                                               genDiff: Lazy[GenericDiff[H]],
-                                              comp: Compare[A] = Compare.default[A]): Future[TestState] = {
+                                              ingoreA: IgnoreFields[A] = IgnoreFields[A]): Future[TestState] = {
     def request(p: P): Future[(RequestT, ResponseT, ResponseT)] =
       Future {
         val request    = requestGen(rand)(p)
@@ -79,7 +79,7 @@ object TestEngine {
                                                      diffLimit: Int)
                                                     (implicit gen: LabelledGeneric.Aux[A, H],
                                                               genDiff: Lazy[GenericDiff[H]],
-                                                              comp: Compare[A] = Compare.default[A]): TestState = {
+                                                              ignoreA: IgnoreFields[A] = IgnoreFields[A]): TestState = {
     def addReasons(reason: Diff): Seq[Diff] =
       if (state.reasons.length >= diffLimit)
         state.reasons
