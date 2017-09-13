@@ -25,7 +25,7 @@ abstract class RefactoringSpec(val service: String) {
                                       (f: Random => P => RequestT)
                                       (implicit gen: LabelledGeneric.Aux[A, H],
                                                 genDiff: Lazy[GenericDiff[H]],
-                                                comp: Compare[A] = Compare.default[A]): Unit = {
+                                                ignoreA: IgnoreFields[A] = IgnoreFields[A]): Unit = {
     checks += (endpoint -> LazyCheck(() => artie.check(providersF, config, read, rand)(f)))
   }
 }
