@@ -39,6 +39,9 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
 
       provide[Int].static(0, 1, 2).nextSeq(1) === Seq(0)
       provide[Int].static(0, 1, 2).nextSeq(2) === Seq(0, 0)
+
+      provide[Int].static(0, 1, 2).nextSet(1) === Set(0)
+      provide[Int].static(0, 1, 2).nextSet(2) === Set(0)
     }
 
     "concatenate providers and typesafe select one" >> {

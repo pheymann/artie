@@ -18,6 +18,19 @@ trait DataSelector[A] {
   final def nextSeq(length: Int, acc: Seq[A] = Nil)(implicit rand: Random): Seq[A] = 
     if (length == 0) acc
     else             nextSeq(length - 1, next +: acc)
+
+  @tailrec
+  final def nextSet(size: Int, tries: Int = 0, maxTries: Int = 3, acc: Set[A] = Set.empty)(implicit rand: Random): Set[A] = 
+    if (size == 0 || tries == maxTries)
+      acc
+    else {
+      val updatedAcc = acc + next
+
+      if (updatedAcc.size == acc.size)
+        nextSet(size, tries + 1, maxTries, acc)
+      else
+        nextSet(size - 1, tries, maxTries, updatedAcc)
+    }
 }
 
 final class DataSelectorOps[A] {
