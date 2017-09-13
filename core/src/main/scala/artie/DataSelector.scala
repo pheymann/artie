@@ -18,7 +18,7 @@ trait DataSelector[A] {
 
   /** Randomly create a sequence of elements.
     * 
-    * @length number of elements
+    * @param length number of elements
     */
   @tailrec
   final def nextSeq(length: Int, acc: Seq[A] = Nil)(implicit rand: Random): Seq[A] = 
@@ -27,7 +27,7 @@ trait DataSelector[A] {
 
   /** Randomly create a set of elements with 1 <= set.size <= size.
     * 
-    * @size maximum size of set
+    * @param size maximum size of set
     */
   @tailrec
   final def nextSet(size: Int, tries: Int = 0, maxTries: Int = 3, acc: Set[A] = Set.empty)(implicit rand: Random): Set[A] = 
@@ -48,7 +48,7 @@ final class DataSelectorOps[A] {
 
   /** Create a selector from static data.
     * 
-    * @data sequence of elements
+    * @param data sequence of elements
     */
   def static(data: A*)(implicit randF: Rand[Int, Int]) = new DataSelector[A] {
     def next(implicit rand: Random): A =
@@ -57,8 +57,8 @@ final class DataSelectorOps[A] {
 
   /** Create a selector form randomly generated data.
     * 
-    * @min smallest element value
-    * @max largest element value
+    * @param min smallest element value
+    * @param max largest element value
     */
   def random(min: A, max: A)
             (implicit gen: RandomGenerator[A], randF: Rand[Unit, Double]) = new DataSelector[A] {
@@ -69,8 +69,8 @@ final class DataSelectorOps[A] {
 
   /** Create a selector from database-fetched data.
     * 
-    * @query data query
-    * @db database descriptor
+    * @param query data query
+    * @param db database descriptor
     */
   def database(query: String, db: Database)
               (implicit gen: DatabaseGenerator[A], ec: ExecutionContext, randF: Rand[Int, Int]): Future[DataSelector[A]] =
@@ -80,10 +80,10 @@ final class DataSelectorOps[A] {
 
     /** Create a selector deom randomly fetch data.
       * 
-      * @table target table
-      * @column column to be retrieved
-      * @limit maximum number of elements
-      * @db database descriptor
+      * @param table target table
+      * @param column column to be retrieved
+      * @param limit maximum number of elements
+      * @param db database descriptor
       */
     def random(table: String, column: String, limit: Int, db: Database)
               (implicit gen: DatabaseGenerator[A], ec: ExecutionContext, randF: Rand[Int, Int]): Future[DataSelector[A]] =

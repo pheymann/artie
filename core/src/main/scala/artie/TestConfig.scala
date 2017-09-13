@@ -32,25 +32,25 @@ trait TestConfigOps {
 
     /** Number of repetitions of a test case.
       * 
-      * @rep number of repetitions
+      * @param rep number of repetitions
       */
     def repetitions(rep: Int) = config.copy(repetitions = rep)
 
     /** Number of parallel running requests.
       * 
-      * @par number of parallel requests.
+      * @param par number of parallel requests.
       */
     def parallelism(par: Int) = config.copy(parallelism = par)
 
     /** Should a test case stop when it encounters the first failure?
       * 
-      *  @stop if `true` a test case will be stopped on first failure.
+      * @param stop if `true` a test case will be stopped on first failure.
       */
     def stopOnFailure(stop: Boolean) = config.copy(stopOnFailure = stop)
 
     /** Maximum number of shown response differences.
       * 
-      * @limit shown diff limit
+      * @param limit shown diff limit
       */
     def shownDiffsLimit(limit: Int) = config.copy(diffLimit = limit)
   }
