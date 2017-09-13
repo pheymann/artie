@@ -1,4 +1,4 @@
 package artie
 
-/** Reads a Json String and creates and instance of `A` or failes. */
+/** Type class to map raw jsons to instances of `A`. */
 trait Read[A] extends (String => Either[String, A])

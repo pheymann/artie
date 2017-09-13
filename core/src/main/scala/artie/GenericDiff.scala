@@ -3,6 +3,8 @@ package artie
 import shapeless._
 import shapeless.labelled.FieldType
 
+import scala.annotation.implicitNotFound
+
 /** Difference if a field `a` of two instances of some case class `A`.*/
 trait Diff {
 
@@ -11,6 +13,7 @@ trait Diff {
 }
 
 /** Function generating the `Diff`s of between two LabelledGenerics. */
+@implicitNotFound("Cannot find Eq instance for Type ${H}")
 trait GenericDiff[H <: HList] {
 
   type HI = H

@@ -13,6 +13,7 @@ object Util {
 
     val statesF = {
       if (isSequential) {
+        // run each check after the previous has finished
         def runInSequence(remaining: Seq[(String, LazyCheck)], acc: Seq[(String, TestState)]): Future[Seq[(String, TestState)]] = remaining match {
           case (endpoint, check) +: tail =>
             println(s" + check $endpoint")
@@ -29,6 +30,7 @@ object Util {
         runInSequence(checks.result(), Nil)
       }
       else {
+        // start all checks
         val stateFs = checks.result().map {
           case (endpoint, check) =>
             println(s" + check $endpoint")

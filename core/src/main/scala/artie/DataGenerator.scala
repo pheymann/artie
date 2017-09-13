@@ -4,8 +4,10 @@ import scala.util.Random
 
 import java.sql.{ResultSet, Connection, Statement, DriverManager}
 
+/** Type trait for data generators (source of providers). */
 trait DataGenerator
 
+/** Randomly generates data of type `A`. */
 trait RandomGenerator[A] extends DataGenerator {
 
   def apply(min: A, max: A, rand: Unit => Double): A
@@ -16,6 +18,7 @@ object RandomGenerator {
   type Rand[A, B] = Random => A => B
 }
 
+/** Queries data from some database. */
 trait DatabaseGenerator[A] extends DataGenerator {
 
   import DatabaseGenerator._
@@ -25,6 +28,7 @@ trait DatabaseGenerator[A] extends DataGenerator {
 
 object DatabaseGenerator {
 
+  /** Database descriptor. */
   trait Database {
 
     def driver: String

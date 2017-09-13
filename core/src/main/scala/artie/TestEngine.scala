@@ -20,6 +20,7 @@ object TestEngine {
     }
   }
 
+  // executes a test case
   def run[P <: HList, A, H <: HList](rand: Random,
                                      pf: Future[P],
                                      config: TestConfig,
@@ -30,6 +31,7 @@ object TestEngine {
                                               gen: LabelledGeneric.Aux[A, H],
                                               genDiff: Lazy[GenericDiff[H]],
                                               ingoreA: IgnoreFields[A] = IgnoreFields[A]): Future[TestState] = {
+    // build and execute a single request and collect responses
     def request(p: P): Future[(RequestT, ResponseT, ResponseT)] =
       Future {
         val request    = requestGen(rand)(p)
@@ -43,11 +45,12 @@ object TestEngine {
     def engine(p: P, state: TestState): Future[TestState] = {
       import config.{repetitions, parallelism, stopOnFailure}
 
-      val diff = repetitions - state.total
+      val remaining = repetitions - state.total
 
-      if (diff > 0 && (!stopOnFailure || state.failed == 0)) {
+      // if we have remaining repetitions and we didn't see a failure yet
+      if (remaining > 0 && (!stopOnFailure || state.failed == 0)) {
         Future.sequence(
-          Seq.tabulate(if (diff < parallelism) diff else parallelism) { _ =>
+          Seq.tabulate(if (remaining < parallelism) remaining else parallelism) { _ =>
             request(p)
           }
         ).flatMap { responses =>

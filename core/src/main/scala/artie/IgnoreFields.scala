@@ -3,6 +3,7 @@ package artie
 import shapeless._
 import shapeless.ops.record._
 
+/** Type class to specify fields that will be ignore during comparison. */
 trait IgnoreFields[A] { self =>
 
   def fields: Set[Symbol]
