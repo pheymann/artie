@@ -7,6 +7,7 @@ import artie.Util._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
+/** Framework to collect multiple `suite.RefactoringSpec`s and execute them together. */
 abstract class RefactoringSuite {
 
   def specs: Seq[RefactoringSpec]
