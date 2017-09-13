@@ -78,6 +78,7 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
  - [Read responses](#read-responses)
  - [Providers](#providers)
  - [TestConfig](#testconfig)
+ - [Data Selector](#data-selector)
  - [Request Builder](#request-builder)
  - [Test Suite](#test-suite)
  - [Ignore Response Fields](#ignore-response-fields)
@@ -192,6 +193,16 @@ Additional settings (function calls):
  - `parallelism`: how many requests can be ran in parallel
  - `stopOnFailure`: default is `true`, if set to `false` the test will continue in the presence of a difference
  - `shownDiffsLimit`: default is `1`, how many diffs are shown
+
+### Data Selector
+You can select data for your requests by:
+
+```Scala
+select('id, p).next // single element
+select('id, p).nextOpt // single element which can be `Some` or `None`
+select('id, p).nextSeq(10) // sequence of elements of length 10
+select('id, p).nextSet(10) // set of elements of maximum size 10
+```
 
 ### Request Builder
 You can create:
