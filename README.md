@@ -73,18 +73,20 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
  - [Get This Framework](#get-this-framework)
  - [Dependencies](#dependencies)
  - [Read responses](#read-responses)
- - [Response Comparison](#response-comparison)
  - [Providers](#providers)
  - [TestConfig](#testconfig)
  - [Request Builder](#request-builder)
- - [Add your Database](#add-your-database)
+ - [Test Suite](#test-suite)
  - [Ignore Response Fields](#ignore-response-fields)
+ - [Response Comparison](#response-comparison)
+ - [Add your Database](#add-your-database)
 
 ### Get This Framework
 You can add it as dependency for Scala **2.11** and **2.12**:
 
 ```Scala
-libraryDependencies += "com.github.pheymann" %% "artie" % "0.1.0-RC1" % Test
+// take a look at the maven batch to find the latest version
+libraryDependencies += "com.github.pheymann" %% "artie" % <version> % Test
 ```
 
 or build it locally:
@@ -124,29 +126,6 @@ object PlayJsonToRead {
   }
 }
 ```
-
-### Response Comparison
-Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your responses of class `R` 
-and comparing each field:
-
-```Scala
-(old: R, refact: R) => (old: FieldValues, refact: FieldValues) => Seq[Diff]
-```
-
-The result is a sequence of `Diff` with each diff providing the field name and:
-  - the two original values,
-  - a set of diffs of the two values.
-
-Currently the framework is able to provide detailed compare-results (fields with values) for:
-  - simple case classes (`case class User(id: Long, name: String`)
-  - nested case classes (`case class Friendship(base: User, friend: User)`)
-  - sequences, sets and arrays of case classes (`case class Group(members: Set[User])`)
-  - maps of case classes (`case class UserTopic(topics: Map[Topic, User])`)
-  - combination of these
-
-Everythings else will be compare by `!=` and completely reported on failure.
-
-If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
 
 ### Providers
 Providers select a single element randomly on every `next` from an underlying
@@ -236,6 +215,48 @@ val h = Headers <&> ("Content-Type", "application/json")
 post(???, p, h, Some("""{"id": 0}"""))
 ```
 
+### Test Suite
+You don't want to execute all your specs by hand? Then you `artie.suite.RefactoringSpec` (as replacement for
+`artie.RefactoringSpec`) and `artie.suite.RefactoringSuite` to build and collect specs you execute together.
+
+### Ignore Response Fields
+Sometimes it is necessary to ignore some response fields (eg. timestamp). If you don't want to rewrite your
+json mapping you can provide a `IgnoreFields` instance:
+
+```
+final case class Log(msg: String, time: Long)
+
+implicit val logIgnore = IgnoreFields[Log].ignore('time)
+   
+check("log-endpoint", providers, conf, read[Log]) { ...}
+```
+
+The `Symbol` has to be equal to the field name. If you write something which doesn't exists in your `case class`
+the compiler will tell you.
+
+### Response Comparison
+Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your responses of class `R` 
+and comparing each field:
+
+```Scala
+(old: R, refact: R) => (old: FieldValues, refact: FieldValues) => Seq[Diff]
+```
+
+The result is a sequence of `Diff` with each diff providing the field name and:
+  - the two original values,
+  - a set of diffs of the two values.
+
+Currently the framework is able to provide detailed compare-results (fields with values) for:
+  - simple case classes (`case class User(id: Long, name: String`)
+  - nested case classes (`case class Friendship(base: User, friend: User)`)
+  - sequences, sets and arrays of case classes (`case class Group(members: Set[User])`)
+  - maps of case classes (`case class UserTopic(topics: Map[Topic, User])`)
+  - combination of these
+
+Everythings else will be compare by `!=` and completely reported on failure.
+
+If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
+
 ### Add your Database
 You can add your Database as easy as this:
 
@@ -262,19 +283,4 @@ object Mysql {
     val password = _password
   }
 }
-```
-### Ignore Response Fields
-Sometimes it is necessary to ignore some response fields (eg. timestamp). If you don't want to rewrite your
-json mapping you can provide a `Compare` instance:
-
-```
-final case class Log(msg: String, time: Long)
-
-implicit val logComp = new Compare[Log] {
-  def compare(l: Log, r: Log) = Seq(
-    diff("msg")(l.msg, r.msg)
-  }
-}
-   
-check("log-endpoint", providers, conf, read[Log]) { ...}
 ```
