@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 
 /** Framework to build a stand-alone refactoring spec app (main included).
   * 
-  * @_service name of the service which was refactored
+  * @param _service name of the service which was refactored
   */
 abstract class RefactoringSpec(_service: String) extends suite.RefactoringSpec(_service) {
 

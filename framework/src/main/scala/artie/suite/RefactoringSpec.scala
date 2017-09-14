@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.global
 /** Framework to build refactoring specs which can be combined into
   * a one suite to be executed together.
   * 
-  * @service name of the service which was refactored
+  * @param service name of the service which was refactored
   */
 abstract class RefactoringSpec(val service: String) {
 
@@ -30,10 +30,10 @@ abstract class RefactoringSpec(val service: String) {
 
   /** Adds a test case to this spec.
     * 
-    * @endpoint short description of service endpoint
-    * @providersF collection of `DataProvider`s
-    * @config test case configuration
-    * @read json to instance mapping
+    * @param endpoint short description of service endpoint
+    * @param providersF collection of `DataProvider`s
+    * @param config test case configuration
+    * @param read json to instance mapping
     */
   def check[P <: HList, A, H <: HList](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
                                       (f: Random => P => RequestT)
