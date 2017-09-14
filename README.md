@@ -68,8 +68,8 @@ testing refactorings for my-service:
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 ```
 
-Here `Invalid` indicates requests which lead to 3.x.x, 4.x.x or 5.x.x responses from both service instances and
-`Failed` requests which produced different responses were at least one succeeded.
+Here `Invalid` indicates response pairs with the same error code (3.x.x, 4.x.x or 5.x.x) from both service instances and
+`Failed` requests which produced different responses in code/body.
 
 For some examples take a look [here](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/examples).
 
