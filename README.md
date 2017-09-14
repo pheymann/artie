@@ -3,7 +3,7 @@
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
 You want to change a (legacy) REST service which has no tests and it is impossible to
-write some without rebuilding the whole thing? If so this tool may help you. It is
+write some tests without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
 two instances of your service (old and new) and compare the responses.
 
