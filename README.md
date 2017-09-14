@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/pheymann/artie.svg?branch=master)](https://travis-ci.org/pheymann/artie)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.12)
+[![codecov.io](http://codecov.io/github/pheymann/artie/coverage.svg?branch=master)](http://codecov.io/github/pheymann/artie?branch=master)
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
 You want to change a (legacy) REST service which has no tests and it is impossible to
