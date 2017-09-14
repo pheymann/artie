@@ -57,7 +57,10 @@ lazy val mavenSettings = Seq(
 
 lazy val artie = project
   .in(file("."))
-  .settings(commonSettings: _*)
+  .settings(
+    commonSettings,
+    coverageExcludedPackages := "examples.*"
+  )
   .aggregate(core, framework, examples)
 
 lazy val core = project
