@@ -133,8 +133,7 @@ object PlayJsonToRead {
 ```
 
 ### Providers
-Providers select a single element randomly on every `next` from an underlying
-data set.
+Providers select elements randomly from an underlying data set (more informaion [here](#data-selector)).
 
 To select the next element you have to determine the provide by its **id**:
 
