@@ -1,4 +1,4 @@
-package util
+package examples.util
 
 import artie.Read
 

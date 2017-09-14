@@ -83,26 +83,34 @@ object TestEngine {
                                                     (implicit gen: LabelledGeneric.Aux[A, H],
                                                               genDiff: Lazy[GenericDiff[H]],
                                                               ignoreA: IgnoreFields[A] = IgnoreFields[A]): TestState = {
-    def addReasons(reason: Diff): Seq[Diff] =
+    def addReasons(reasons: Seq[Diff]): Seq[Diff] =
       if (state.reasons.length >= diffLimit)
         state.reasons
       else
-        reason +: state.reasons
+        reasons ++: state.reasons
 
     if (base.isError && refactored.isError) {
-      val reason = ResponseCodeDiff(request, s"invalid:\n  $base\n  $refactored")
+      if (base.code == refactored.code) {
+        val reason = ResponseCodeDiff(request, s"invalid:\n  $base\n  $refactored")
 
-      state.copy(invalid = state.invalid + 1, reasons = addReasons(reason))
+        state.copy(invalid = state.invalid + 1, reasons = addReasons(Seq(reason)))
+      }
+      else {
+        val baseReason   = ResponseCodeDiff(request, "base service status error:\n  " + base)
+        val refactReason = ResponseCodeDiff(request, "refactored service status error:\n  " + refactored)
+
+        state.copy(failed = state.failed + 1, reasons = addReasons(Seq(baseReason, refactReason)))
+      }
     }
     else if (base.isError) {
       val reason = ResponseCodeDiff(request, "base service status error:\n  " + base)
 
-      state.copy(failed = state.failed + 1, reasons = addReasons(reason))
+      state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
     }
     else if (refactored.isError) {
       val reason = ResponseCodeDiff(request, "refactored service status error:\n  " + refactored)
 
-      state.copy(failed = state.failed + 1, reasons = addReasons(reason))
+      state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
     }
     else {
       val stateE = for {
@@ -116,7 +124,7 @@ object TestEngine {
         else {
           val reason = ResponseContentDiff(request, differences)
 
-          state.copy(failed = state.failed + 1, reasons = addReasons(reason))
+          state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
         }
       }
 

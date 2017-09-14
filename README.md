@@ -1,9 +1,10 @@
 [![Build Status](https://travis-ci.org/pheymann/artie.svg?branch=2.11.x)](https://travis-ci.org/pheymann/artie)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.pheymann/artie_2.11)
+[![codecov.io](http://codecov.io/github/pheymann/artie/coverage.svg?branch=2.11.x)](http://codecov.io/github/pheymann/artie?branch=2.11.x)
 
 # [WIP] artie {from rrt := rest-refactoring-test-framework}
 You want to change a (legacy) REST service which has no tests and it is impossible to
-write some without rebuilding the whole thing? If so this tool may help you. It is
+write some tests without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
 two instances of your service (old and new) and compare the responses.
 
@@ -67,8 +68,8 @@ testing refactorings for my-service:
 Failed: Total: 1; Succeeded: 0, Invalid: 0; Failed: 1
 ```
 
-Here `Invalid` indicates requests which lead to 3.x.x, 4.x.x or 5.x.x responses from both service instances and
-`Failed` requests which produced different responses were at least one succeeded.
+Here `Invalid` indicates response pairs with the same error code (3.x.x, 4.x.x or 5.x.x). Invalide results
+don't fail a test.
 
 For some examples take a look [here](https://github.com/pheymann/artie/tree/master/examples/src/it/scala/examples).
 
@@ -132,8 +133,7 @@ object PlayJsonToRead {
 ```
 
 ### Providers
-Providers select a single element randomly on every `next` from an underlying
-data set.
+Providers select elements randomly from an underlying data set (more informaion [here](#data-selector)).
 
 To select the next element you have to determine the provide by its **id**:
 

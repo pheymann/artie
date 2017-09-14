@@ -83,6 +83,7 @@ lazy val examples = project
   .settings(
     commonSettings,
     Defaults.itSettings,
-    libraryDependencies ++= Dependencies.examples
+    libraryDependencies ++= Dependencies.examples,
+    coverageExcludedPackages := "<empty>;.*examples.*"
   )
   .dependsOn(framework)

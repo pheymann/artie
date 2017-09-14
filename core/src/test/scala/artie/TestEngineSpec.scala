@@ -39,9 +39,13 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
       val resp1 = HttpResponse("Jo,20", 200, Map.empty)
 
       compareResponses(req, resp0, resp0, read, initState, 1) === TestState(1, 0, 0)
-      compareResponses(req, resp0.copy(code = 404), resp0.copy(code = 500), read, initState, 1) === TestState(0, 1, 0, Seq(
-        ResponseCodeDiff(req, "invalid:\n  HttpResponse(John,10,404,Map())\n  HttpResponse(John,10,500,Map())"))
+      compareResponses(req, resp0.copy(code = 404), resp0.copy(code = 404), read, initState, 1) === TestState(0, 1, 0, Seq(
+        ResponseCodeDiff(req, "invalid:\n  HttpResponse(John,10,404,Map())\n  HttpResponse(John,10,404,Map())"))
       )
+      compareResponses(req, resp0.copy(code = 404), resp0.copy(code = 500), read, initState, 1) === TestState(0, 0, 1, Seq(
+        ResponseCodeDiff(req, "base service status error:\n  HttpResponse(John,10,404,Map())"),
+        ResponseCodeDiff(req, "refactored service status error:\n  HttpResponse(John,10,500,Map())")
+      ))
       compareResponses(req, resp0.copy(code = 404), resp0, read, initState, 1) === TestState(0, 0, 1, Seq(
         ResponseCodeDiff(req, "base service status error:\n  HttpResponse(John,10,404,Map())"))
       )
