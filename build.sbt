@@ -57,10 +57,7 @@ lazy val mavenSettings = Seq(
 
 lazy val artie = project
   .in(file("."))
-  .settings(
-    commonSettings,
-    coverageExcludedPackages := "examples.*"
-  )
+  .settings(commonSettings: _*)
   .aggregate(core, framework, examples)
 
 lazy val core = project
@@ -89,6 +86,7 @@ lazy val examples = project
   .settings(
     commonSettings,
     Defaults.itSettings,
-    libraryDependencies ++= Dependencies.examples
+    libraryDependencies ++= Dependencies.examples,
+    coverageExcludedPackages := "<empty>;.*examples.*"
   )
   .dependsOn(framework)
