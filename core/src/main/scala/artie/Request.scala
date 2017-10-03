@@ -14,6 +14,7 @@ trait Request {
 
     def <&>[A](key: String, value: A): Map[String, String] = elements + (key -> value.toString)
     def <&>[A](key: String, values: Seq[A]): Map[String, String] = elements + (key -> values.mkString(","))
+    def <&>[A](key: String, values: Set[A]): Map[String, String] = elements + (key -> values.mkString(","))
 
     def <&>[A](key: String, valueO: Option[A]): Map[String, String] = valueO match {
       case Some(value) => <&>(key, value)
