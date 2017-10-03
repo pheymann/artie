@@ -35,11 +35,9 @@ abstract class RefactoringSpec(val service: String) {
     * @param config test case configuration
     * @param read json to instance mapping
     */
-  def check[P <: HList, A, H <: HList](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
-                                      (f: Random => P => RequestT)
-                                      (implicit gen: LabelledGeneric.Aux[A, H],
-                                                genDiff: Lazy[GenericDiff[H]],
-                                                ignoreA: IgnoreFields[A] = IgnoreFields[A]): Unit = {
+  def check[P <: HList, A](endpoint: String, providersF: Future[P], config: TestConfig, read: Read[A])
+                          (f: Random => P => RequestT)
+                          (implicit diff: GenericDiffRunner[A]): Unit = {
     checks += (endpoint -> LazyCheck(() => artie.check(providersF, config, read, rand)(f)))
   }
 }

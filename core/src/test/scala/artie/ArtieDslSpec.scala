@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 
 final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
 
-  object randomGen extends RandomGeneratorInstances with HighPriorityGenericDiff
+  object randomGen extends RandomGeneratorInstances with HighPriorityGenericDiff with MediumPriorityGenericDiffRunner
 
   import randomGen._
 
@@ -67,11 +67,12 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     "create a Map of request headers" >> {
       Headers === Map.empty[String, String]
 
-      Headers <&> ("0", "hello") <&> ("1", 10) <&> ("2", Some(true)) <&> ("2.1", None)  <&> ("3", Seq(1, 2, 3)) === Map(
+      Headers <&> ("0", "hello") <&> ("1", 10) <&> ("2", Some(true)) <&> ("2.1", None)  <&> ("3", Seq(1, 2, 3)) <&> ("4", Set(1, 2, 3)) === Map(
         "0" -> "hello",
         "1" -> "10",
         "2" -> "true",
-        "3" -> "1,2,3"
+        "3" -> "1,2,3",
+        "4" -> "1,2,3"
       )
     }
 
@@ -126,6 +127,8 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
       val usrGrp0 = UserGroups(Map("a" -> grp0))
       val usrGrp1 = UserGroups(Map("a" -> grp1))
 
+      def diff[A](l: A, r: A)(implicit d: GenericDiffRunner[A]): Seq[Diff] = d(l, r)
+
       printReasons(TestState(0, 0, 1, Seq(
         TotalDiff(diff(usr0, usr1)),
         TotalDiff(diff(frd0, frd1)),
@@ -134,7 +137,8 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         TotalDiff(diff(usrGrp0, usrGrp1)),
         TotalDiff(diff(usrGrp0, UserGroups(Map.empty))),
         TotalDiff(diff(ArrayOfUsers(0L, Array(usr0)), ArrayOfUsers(1L, Array(usr1)))),
-        TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1))))
+        TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1)))),
+        TotalDiff(diff(Seq(usr0), Seq(usr1)))
       )))
 
       implicit val userIg = IgnoreFields[User].ignore('age)

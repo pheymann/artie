@@ -20,6 +20,8 @@ final class GenericDiffSpec extends Specification {
   val usr1 = User("bar", 2)
   val usr2 = User("bar", 3)
 
+  def diff[A](l: A, r: A)(implicit d: GenericDiffRunner[A]): Seq[Diff] = d(l, r)
+
   "Generic difference calculation of case classes" >> {
     "simple case class" >> {
       diff(usr0, usr0) === Nil
@@ -40,10 +42,10 @@ final class GenericDiffSpec extends Specification {
       diff(Group(0L, Nil), Group(0L, Nil)) === Nil
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr0, usr1))) === Nil
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr0, usr2))) === Seq(
-        CollectionElementsDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))
+        CollectionElementsDiff(Some("users"), Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))
       )
       diff(Group(0L, Seq(usr0, usr1)), Group(0L, Seq(usr1, usr0))) === Seq(
-        CollectionElementsDiff("users", Seq(
+        CollectionElementsDiff(Some("users"), Seq(
           TotalDiff(Seq(
             FieldDiff("name", "foo", "bar"),
             FieldDiff("age", 1, 2)
@@ -55,8 +57,8 @@ final class GenericDiffSpec extends Specification {
         ))
       )
       diff(Group(0L, Seq(usr0)), Group(0L, Seq(usr0, usr1))) === Seq(
-        CollectionSizeDiff("users", 1, 2),
-        CollectionElementsDiff("users", Seq(
+        CollectionSizeDiff(Some("users"), 1, 2),
+        CollectionElementsDiff(Some("users"), Seq(
           MissingValue(usr1)
         ))
       )
@@ -68,7 +70,7 @@ final class GenericDiffSpec extends Specification {
     "nested case classes with arrays" >> {
       diff(ArrayOfUsers(0L, Array(usr0, usr1)), ArrayOfUsers(0L, Array(usr0, usr1))) === Nil
       diff(ArrayOfUsers(0L, Array(usr0, usr1)), ArrayOfUsers(0L, Array(usr1, usr0))) === Seq(
-        CollectionElementsDiff("users", Seq(
+        CollectionElementsDiff(Some("users"), Seq(
           TotalDiff(Seq(
             FieldDiff("name", "foo", "bar"),
             FieldDiff("age", 1, 2)
@@ -87,7 +89,7 @@ final class GenericDiffSpec extends Specification {
     "nested case classes with sets" >> {
       diff(SetOfUsers(0L, Set(usr0, usr1)), SetOfUsers(0L, Set(usr1, usr0))) === Nil
       diff(SetOfUsers(0L, Set(usr0, usr2)), SetOfUsers(0L, Set(usr1, usr0))) === Seq(
-        CollectionElementsDiff("users", Seq(
+        CollectionElementsDiff(Some("users"), Seq(
           MissingValue(usr2),
           MissingValue(usr1)
         ))
@@ -103,11 +105,11 @@ final class GenericDiffSpec extends Specification {
       diff(UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1)))), UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1))))) === Nil
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Seq(
         MapDiff("groups", Seq(
-          "a" -> TotalDiff(Seq(CollectionElementsDiff("users", Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))
+          "a" -> TotalDiff(Seq(CollectionElementsDiff(Some("users"), Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))
         ))
       )
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0)))), UserGroups(Map.empty)) === Seq(
-        CollectionSizeDiff("groups", 1, 0),
+        CollectionSizeDiff(Some("groups"), 1, 0),
         MapDiff("groups", Seq(
           "a" -> MissingValue(Group(0L, Seq(usr0)))
         ))
@@ -115,6 +117,12 @@ final class GenericDiffSpec extends Specification {
 
       implicit val mapIg = IgnoreFields[UserGroups].ignore('groups)
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Nil
+    }
+
+    "sequence of case classes" >> {
+      diff(Seq.empty[User], Seq.empty[User]) === Nil
+      diff(Seq(usr0), Seq(usr0)) === Nil
+      diff(Seq(usr0), Seq(usr1)) === Seq(CollectionElementsDiff(None, Seq(TotalDiff(Seq(FieldDiff("name", "foo", "bar"), FieldDiff("age", 1, 2))))))
     }
   }
 }

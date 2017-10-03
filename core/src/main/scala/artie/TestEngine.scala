@@ -21,16 +21,14 @@ object TestEngine {
   }
 
   // executes a test case
-  def run[P <: HList, A, H <: HList](rand: Random,
-                                     pf: Future[P],
-                                     config: TestConfig,
-                                     requestGen: Random => P => RequestT,
-                                     read: Read[A],
-                                     ioEffect: HttpRequest => HttpResponse[String])
-                                    (implicit ec: ExecutionContext,
-                                              gen: LabelledGeneric.Aux[A, H],
-                                              genDiff: Lazy[GenericDiff[H]],
-                                              ingoreA: IgnoreFields[A] = IgnoreFields[A]): Future[TestState] = {
+  def run[P <: HList, A](rand: Random,
+                         pf: Future[P],
+                         config: TestConfig,
+                         requestGen: Random => P => RequestT,
+                         read: Read[A],
+                         ioEffect: HttpRequest => HttpResponse[String])
+                        (implicit ec: ExecutionContext,
+                                  diff: GenericDiffRunner[A]): Future[TestState] = {
     // build and execute a single request and collect responses
     def request(p: P): Future[(RequestT, ResponseT, ResponseT)] =
       Future {
@@ -74,15 +72,13 @@ object TestEngine {
     }
   }
 
-  private[artie] def compareResponses[A, H <: HList](request: RequestT,
-                                                     base: HttpResponse[String],
-                                                     refactored: HttpResponse[String],
-                                                     read: Read[A],
-                                                     state: TestState,
-                                                     diffLimit: Int)
-                                                    (implicit gen: LabelledGeneric.Aux[A, H],
-                                                              genDiff: Lazy[GenericDiff[H]],
-                                                              ignoreA: IgnoreFields[A] = IgnoreFields[A]): TestState = {
+  private[artie] def compareResponses[A](request: RequestT,
+                                         base: HttpResponse[String],
+                                         refactored: HttpResponse[String],
+                                         read: Read[A],
+                                         state: TestState,
+                                         diffLimit: Int)
+                                        (implicit diff: GenericDiffRunner[A]): TestState = {
     def addReasons(reasons: Seq[Diff]): Seq[Diff] =
       if (state.reasons.length >= diffLimit)
         state.reasons
@@ -117,7 +113,7 @@ object TestEngine {
         baseA <- Either.RightProjection(read(base.body))
         refA  <- Either.RightProjection(read(refactored.body))
       } yield {
-        val differences = GenericDiffOps.diff(baseA, refA)
+        val differences = diff(baseA, refA)
 
         if (differences.isEmpty)
           state.copy(succeeded = state.succeeded + 1)
