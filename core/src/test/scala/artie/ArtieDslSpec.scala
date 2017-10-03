@@ -113,8 +113,6 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "difference output (no test)" >> {
-      import GenericDiffOps._
-
       val usr0 = User("foo", 1)
       val usr1 = User("bar", 2)
 

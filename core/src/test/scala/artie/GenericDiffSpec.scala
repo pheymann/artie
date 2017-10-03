@@ -14,8 +14,6 @@ final case class SetOfUsers(id: Long, users: Set[User])
 
 final class GenericDiffSpec extends Specification {
 
-  import artie.GenericDiffOps._
-
   val usr0 = User("foo", 1)
   val usr1 = User("bar", 2)
   val usr2 = User("bar", 3)

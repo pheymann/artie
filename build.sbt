@@ -3,7 +3,7 @@ import sbt.Keys._
 lazy val commonSettings = Seq(
   organization  := "com.github.pheymann",
   version       := "0.1.0-RC3",
-  scalaVersion  := "2.11.11",
+  scalaVersion  := "2.12.3",
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "utf-8",
@@ -19,10 +19,13 @@ lazy val commonSettings = Seq(
     "-Xlint:type-parameter-shadow",
     "-Xlint:unsound-match",
     "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-unused",
     "-Ywarn-inaccessible",
-    "-Ywarn-infer-any"
+    "-Ywarn-infer-any",
+    "-Ywarn-numeric-widen",
+ //   "-Ywarn-unused:implicits", -> get errors for implicit evidence
+    "-Ywarn-unused:imports",
+    "-Ywarn-unused:locals",
+    "-Ywarn-unused:privates"
   )
 )
 
