@@ -142,38 +142,9 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
       : GenericDiff[FieldType[K, Array[V]] :: T] = new GenericDiff[FieldType[K, Array[V]] :: T] {
     def apply(l: HI, r: HI, ignore: Set[Symbol]): Seq[Diff] = {
       if (!ignore.contains(wit.value)) {
-        val sizeL = l.head.length
-        val sizeR = r.head.length
+        val allDiffs = HighPriorityGenericDiff.arrayGenDiff(Some(wit.value.name), l.head, r.head)
 
-        // compare sizes
-        val sizeDiff = {
-          if (sizeL != sizeR)
-            Seq(CollectionSizeDiff(Some(wit.value.name), l.head.length, r.head.length))
-          else
-            Seq.empty[Diff]
-        }
-
-        // collect missing elements
-        val missingDiffs = {
-          if (sizeL > sizeR) l.head.slice(sizeR, sizeL).map(MissingValue(_))
-          else               r.head.slice(sizeL, sizeR).map(MissingValue(_))
-        }
-
-        // generate differences between elements
-        val diffs = l.head.zip(r.head)
-          .flatMap { case (valueL, valueR) =>
-            val diffs = genDiffH.value(gen.to(valueL), gen.to(valueR), ignoreV.fields)
-
-            if (diffs.isEmpty) None
-            else               Some(TotalDiff(diffs))
-          }
-
-        val allDiffs = diffs ++: missingDiffs
-
-        if (allDiffs.isEmpty)
-          sizeDiff ++: genDiffT.value(l.tail, r.tail, ignore)
-        else
-          sizeDiff ++: (CollectionElementsDiff(Some(wit.value.name), allDiffs) +: genDiffT.value(l.tail, r.tail, ignore))
+        allDiffs ++: genDiffT.value(l.tail, r.tail, ignore)
       }
       else
         genDiffT.value(l.tail, r.tail, ignore)
@@ -322,6 +293,11 @@ object HighPriorityGenericDiff {
     if (allDiffs.isEmpty) sizeDiff
     else                  sizeDiff ++: Seq(CollectionElementsDiff(fieldO, allDiffs))
   }
+
+  private[artie] def arrayGenDiff[A, R <: HList](fieldO: Option[String], l: Array[A], r: Array[A])(implicit gen: LabelledGeneric.Aux[A, R],
+                                                                                                            genDiff: Lazy[GenericDiff[R]],
+                                                                                                            ignore: IgnoreFields[A]): Seq[Diff] =
+    seqGenDiff(fieldO, l.toSeq, r.toSeq)
 }
 
 object GenericDiffOps {
@@ -353,9 +329,15 @@ trait LowPriorityGenericDiffRunner {
 
 trait MediumPriorityGenericDiffRunner extends LowPriorityGenericDiffRunner {
 
-  implicit def seqOps[A, H <: HList](implicit gen: LabelledGeneric.Aux[A, H],
-                                              genDiff: Lazy[GenericDiff[H]],
-                                              ignoreA: IgnoreFields[A] = IgnoreFields[A]) = new GenericDiffRunner[Seq[A]] {
+  implicit def seqRunner[A, H <: HList](implicit gen: LabelledGeneric.Aux[A, H],
+                                                 genDiff: Lazy[GenericDiff[H]],
+                                                 ignoreA: IgnoreFields[A] = IgnoreFields[A]) = new GenericDiffRunner[Seq[A]] {
     def apply(l: Seq[A], r: Seq[A]): Seq[Diff] = HighPriorityGenericDiff.seqGenDiff(None, l, r)
+  }
+
+  implicit def arrayRunner[A, H <: HList](implicit gen: LabelledGeneric.Aux[A, H],
+                                                   genDiff: Lazy[GenericDiff[H]],
+                                                   ignoreA: IgnoreFields[A] = IgnoreFields[A]) = new GenericDiffRunner[Array[A]] {
+    def apply(l: Array[A], r: Array[A]): Seq[Diff] = HighPriorityGenericDiff.arrayGenDiff(None, l, r)
   }
 }

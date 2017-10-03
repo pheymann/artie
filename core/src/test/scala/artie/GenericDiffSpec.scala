@@ -124,5 +124,12 @@ final class GenericDiffSpec extends Specification {
       diff(Seq(usr0), Seq(usr0)) === Nil
       diff(Seq(usr0), Seq(usr1)) === Seq(CollectionElementsDiff(None, Seq(TotalDiff(Seq(FieldDiff("name", "foo", "bar"), FieldDiff("age", 1, 2))))))
     }
+
+    "array of case classes" >> {
+      // relies on seqGenDiff
+      diff(Array.empty[User], Array.empty[User]) === Nil
+      diff(Array(usr0), Array(usr0)) === Nil
+      diff(Array(usr0), Array(usr1)) === Seq(CollectionElementsDiff(None, Seq(TotalDiff(Seq(FieldDiff("name", "foo", "bar"), FieldDiff("age", 1, 2))))))
+    }
   }
 }
