@@ -98,8 +98,10 @@ final case class CollectionElementsDiff(nameO: Option[String], elements: Seq[Dif
 }
 
 /** Difference of `Map` pairs */
-final case class MapDiff(name: String, keyValues: Seq[(String, Diff)]) extends Diff {
-  def stringify(ind: String) = s"$ind$name: {" + keyValues.foldLeft("") { case (acc, (key, diffs)) =>
+final case class MapDiff(nameO: Option[String], keyValues: Seq[(String, Diff)]) extends Diff {
+  private val name = nameO.fold("")(n => n + ": ")
+
+  def stringify(ind: String) = s"$ind$name{" + keyValues.foldLeft("") { case (acc, (key, diffs)) =>
     s"$acc\n$ind  $key:\n" + diffs.stringify(ind + "    ")
   } + s"\n$ind}"
 }
@@ -203,53 +205,9 @@ trait HighPriorityGenericDiff extends MediumPriorityGenericDiff {
       : GenericDiff[FieldType[K, Map[VK, V]] :: T] = new GenericDiff[FieldType[K, Map[VK, V]] :: T] {
     def apply(l: HI, r: HI, ignore: Set[Symbol]): Seq[Diff] = {
       if (!ignore.contains(wit.value)) {
-        val sizeDiff = {
-          // compare sizes
-          val sizeL = l.head.size
-          val sizeR = r.head.size
+        val allDiffs = HighPriorityGenericDiff.mapGenDiff(Some(wit.value.name), l.head, r.head)
 
-          if (sizeL != sizeR)
-            Seq(CollectionSizeDiff(Some(wit.value.name), sizeL, sizeR))
-          else
-            Seq.empty[Diff]
-        }
-
-        val keysL = l.head.keys.toSet
-        val keysR = r.head.keys.toSet
-
-        val missingKeysL = keysL.diff(keysR)
-        val missingKeysR = keysR.diff(keysL)
-
-        // collect missing key-value pairs
-        val missingDiffs = {
-          val diffL: Seq[(String, Diff)] = missingKeysL.map(key => key.toString -> MissingValue(l.head(key)))(collection.breakOut)
-          val diffR: Seq[(String, Diff)] = missingKeysR.map(key => key.toString -> MissingValue(r.head(key)))(collection.breakOut)
-
-          diffL ++: diffR
-        }
-
-        // generate differences between remaining elements
-        val diffs: Seq[(String, Diff)] = (l.head.keys.toSet -- missingKeysL)
-          .flatMap { key =>
-            val valueL = l.head(key)
-
-            r.head
-              .get(key)
-              .map { valueR =>
-                val innerDiffs = genDiffH.value(gen.to(valueL), gen.to(valueR), ignoreV.fields)
-                
-                if (innerDiffs.isEmpty) None
-                else                    Some(key.toString -> TotalDiff(innerDiffs))
-              }
-              .getOrElse(None)
-          }(collection.breakOut)
-
-        val allDiffs = diffs ++: missingDiffs
-
-        if (allDiffs.isEmpty)
-          sizeDiff ++: genDiffT.value(l.tail, r.tail, ignore)
-        else
-          sizeDiff ++: (MapDiff(wit.value.name, allDiffs) +: genDiffT.value(l.tail, r.tail, ignore))
+        allDiffs ++: genDiffT.value(l.tail, r.tail, ignore)
       }
       else
         genDiffT.value(l.tail, r.tail, ignore)
@@ -298,6 +256,55 @@ object HighPriorityGenericDiff {
                                                                                                             genDiff: Lazy[GenericDiff[R]],
                                                                                                             ignore: IgnoreFields[A]): Seq[Diff] =
     seqGenDiff(fieldO, l.toSeq, r.toSeq)
+
+  private[artie] def mapGenDiff[V, A, R <: HList](fieldO: Option[String], l: Map[V, A], r: Map[V, A])(implicit gen: LabelledGeneric.Aux[A, R],
+                                                                                                               genDiff: Lazy[GenericDiff[R]],
+                                                                                                               ignore: IgnoreFields[A]): Seq[Diff] = {
+    val sizeDiff = {
+      // compare sizes
+      val sizeL = l.size
+      val sizeR = r.size
+
+      if (sizeL != sizeR)
+        Seq(CollectionSizeDiff(fieldO, sizeL, sizeR))
+      else
+        Seq.empty[Diff]
+    }
+
+    val keysL = l.keys.toSet
+    val keysR = r.keys.toSet
+
+    val missingKeysL = keysL.diff(keysR)
+    val missingKeysR = keysR.diff(keysL)
+
+    // collect missing key-value pairs
+    val missingDiffs = {
+      val diffL: Seq[(String, Diff)] = missingKeysL.map(key => key.toString -> MissingValue(l(key)))(collection.breakOut)
+      val diffR: Seq[(String, Diff)] = missingKeysR.map(key => key.toString -> MissingValue(r(key)))(collection.breakOut)
+
+      diffL ++: diffR
+    }
+
+    // generate differences between remaining elements
+    val diffs: Seq[(String, Diff)] = (l.keys.toSet -- missingKeysL)
+      .flatMap { key =>
+        val valueL = l(key)
+
+        r.get(key)
+          .map { valueR =>
+            val innerDiffs = genDiff.value(gen.to(valueL), gen.to(valueR), ignore.fields)
+            
+            if (innerDiffs.isEmpty) None
+            else                    Some(key.toString -> TotalDiff(innerDiffs))
+          }
+          .getOrElse(None)
+      }(collection.breakOut)
+
+    val allDiffs = diffs ++: missingDiffs
+
+    if (allDiffs.isEmpty) sizeDiff
+    else                  sizeDiff ++: Seq(MapDiff(fieldO, allDiffs))
+  }
 }
 
 object GenericDiffOps {
@@ -339,5 +346,11 @@ trait MediumPriorityGenericDiffRunner extends LowPriorityGenericDiffRunner {
                                                    genDiff: Lazy[GenericDiff[H]],
                                                    ignoreA: IgnoreFields[A] = IgnoreFields[A]) = new GenericDiffRunner[Array[A]] {
     def apply(l: Array[A], r: Array[A]): Seq[Diff] = HighPriorityGenericDiff.arrayGenDiff(None, l, r)
+  }
+
+  implicit def mapRunner[V, A, H <: HList](implicit gen: LabelledGeneric.Aux[A, H],
+                                                    genDiff: Lazy[GenericDiff[H]],
+                                                    ignoreA: IgnoreFields[A] = IgnoreFields[A]) = new GenericDiffRunner[Map[V, A]] {
+    def apply(l: Map[V, A], r: Map[V, A]): Seq[Diff] = HighPriorityGenericDiff.mapGenDiff(None, l, r)
   }
 }
