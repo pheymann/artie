@@ -136,7 +136,8 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
         TotalDiff(diff(usrGrp0, UserGroups(Map.empty))),
         TotalDiff(diff(ArrayOfUsers(0L, Array(usr0)), ArrayOfUsers(1L, Array(usr1)))),
         TotalDiff(diff(SetOfUsers(0L, Set(usr0)), SetOfUsers(1L, Set(usr1)))),
-        TotalDiff(diff(Seq(usr0), Seq(usr1)))
+        TotalDiff(diff(Seq(usr0), Seq(usr1))),
+        TotalDiff(diff(Map(0L -> usr0), Map(0L -> usr1)))
       )))
 
       implicit val userIg = IgnoreFields[User].ignore('age)

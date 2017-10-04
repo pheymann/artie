@@ -126,7 +126,7 @@ object TestEngine {
 
       stateE match {
         case Right(newState) => newState
-        case Left(error)     => throw new IllegalArgumentException("couldn't parse response:\n" + error)
+        case Left(error)     => throw new IllegalArgumentException(s"couldn't parse response:\n request: ${request}\n response: ${base}\n $error")
       }
     }
   }

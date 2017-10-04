@@ -102,13 +102,13 @@ final class GenericDiffSpec extends Specification {
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1))))) === Nil
       diff(UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1)))), UserGroupsId(Map(1 -> Group(0L, Seq(usr0, usr1))))) === Nil
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0, usr1)))), UserGroups(Map("a" -> Group(0L, Seq(usr0, usr2))))) === Seq(
-        MapDiff("groups", Seq(
+        MapDiff(Some("groups"), Seq(
           "a" -> TotalDiff(Seq(CollectionElementsDiff(Some("users"), Seq(TotalDiff(Seq(FieldDiff("age", 2, 3)))))))
         ))
       )
       diff(UserGroups(Map("a" -> Group(0L, Seq(usr0)))), UserGroups(Map.empty)) === Seq(
         CollectionSizeDiff(Some("groups"), 1, 0),
-        MapDiff("groups", Seq(
+        MapDiff(Some("groups"), Seq(
           "a" -> MissingValue(Group(0L, Seq(usr0)))
         ))
       )
@@ -128,6 +128,12 @@ final class GenericDiffSpec extends Specification {
       diff(Array.empty[User], Array.empty[User]) === Nil
       diff(Array(usr0), Array(usr0)) === Nil
       diff(Array(usr0), Array(usr1)) === Seq(CollectionElementsDiff(None, Seq(TotalDiff(Seq(FieldDiff("name", "foo", "bar"), FieldDiff("age", 1, 2))))))
+    }
+
+    "map of case classes" >> {
+      diff(Map.empty[Long, User], Map.empty[Long, User]) === Nil
+      diff(Map(0L -> usr0), Map(0L -> usr0)) === Nil
+      diff(Map(0L -> usr0), Map(0L -> usr1)) === Seq(MapDiff(None, Seq(("0", TotalDiff(Seq(FieldDiff("name", "foo", "bar"), FieldDiff("age", 1, 2)))))))
     }
   }
 }
