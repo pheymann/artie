@@ -1,32 +1,60 @@
 import sbt.Keys._
 
+val `compiler-2.12` = Seq(
+  "-deprecation",
+  "-encoding", "utf-8",
+  "-explaintypes",
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xfuture",
+  "-Xlint:inaccessible",
+  "-Xlint:infer-any",
+  "-Xlint:missing-interpolator",
+  "-Xlint:option-implicit",
+  "-Xlint:type-parameter-shadow",
+  "-Xlint:unsound-match",
+  "-Ywarn-dead-code",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any",
+  "-Ywarn-numeric-widen",
+  //   "-Ywarn-unused:implicits", -> get errors for implicit evidence
+  "-Ywarn-unused:imports",
+  "-Ywarn-unused:locals",
+  "-Ywarn-unused:privates"
+)
+
+val `compiler-2.11` = Seq(
+  "-deprecation",
+  "-encoding", "utf-8",
+  "-explaintypes",
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xfuture",
+  "-Xlint:inaccessible",
+  "-Xlint:infer-any",
+  "-Xlint:missing-interpolator",
+  "-Xlint:option-implicit",
+  "-Xlint:type-parameter-shadow",
+  "-Xlint:unsound-match",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any"
+)
+
 lazy val commonSettings = Seq(
   organization  := "com.github.pheymann",
   version       := "0.1.0-RC4",
-  scalaVersion  := "2.12.3",
-  scalacOptions ++= Seq(
-    "-deprecation",
-    "-encoding", "utf-8",
-    "-explaintypes",
-    "-feature",
-    "-unchecked",
-    "-Xfatal-warnings",
-    "-Xfuture",
-    "-Xlint:inaccessible",
-    "-Xlint:infer-any",
-    "-Xlint:missing-interpolator",
-    "-Xlint:option-implicit",
-    "-Xlint:type-parameter-shadow",
-    "-Xlint:unsound-match",
-    "-Ywarn-dead-code",
-    "-Ywarn-inaccessible",
-    "-Ywarn-infer-any",
-    "-Ywarn-numeric-widen",
- //   "-Ywarn-unused:implicits", -> get errors for implicit evidence
-    "-Ywarn-unused:imports",
-    "-Ywarn-unused:locals",
-    "-Ywarn-unused:privates"
-  )
+  crossScalaVersions := Seq("2.11.11", "2.12.3"),
+  scalaVersion       := "2.12.3",
+  scalacOptions      ++= { CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 12)) => `compiler-2.12`
+    case Some((2, 11)) => `compiler-2.11`
+    case _             => Seq.empty[String]
+  }}
 )
 
 lazy val mavenSettings = Seq(
