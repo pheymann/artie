@@ -105,7 +105,7 @@ In the following I'll describe the basic elements of a refactoring spec: test co
 ### Table of Contents
  - [TestConfig](#testconfig)
  - [Providers](#providers)
- - [Read responses](#read-responses)
+ - [Read REST responses](#read-rest-responses)
  - [Data Selector](#data-selector)
  - [Request Builder](#request-builder)
  - [Test Suite](#test-suite)
@@ -177,7 +177,7 @@ val db1 = h2(<host>, <user>, <password>)
 ```
 
 ### Read REST responses
-Now that we have described config and providers we still need the Json mapping. This is done by creating an instance of `Read` for your response type:
+You need to tell **artie** how to read the json response sent by your service. To do so you have to create an instance of `Read` for that type:
 
 ```Scala
 // manually for every type
@@ -188,7 +188,7 @@ val userRead = new Read[User] {
 // or by reusing your mappings from some json-frameworks
 object PlayJsonToRead {
 
-  def read[U](implicit reads: play.json.Reads[U]): Read[U] = new Read[U] {
+  def read[U](implicit reads: play.api.libs.json.Reads[U]): Read[U] = new Read[U] {
     def apply(json: String): Either[String, U] = 
       Json.fromJson[U](Json.parse(json)) match {
         case JsSuccess(u, _) => Right(u)
@@ -221,7 +221,7 @@ implicit r => p =>
   select('tag, p).nextSet(10) // set of elements of maximum size 10
 ```
 
-If you try to access a provider which isn't part of `p` the compile will tell you.
+If you try to access a provider which isn't part of `p` the compiler will tell you.
 
 ### Request Builder
 You can create:
@@ -287,16 +287,17 @@ The result is a sequence of `Diff` with each diff providing the field name and:
   - the two original values,
   - a set of diffs of the two values.
 
-Currently the framework is able to provide detailed compare-results (fields with values) for:
+Currently the framework is able to provide detailed comparison results (fields with values) for:
   - simple case classes (`case class User(id: Long, name: String`)
   - nested case classes (`case class Friendship(base: User, friend: User)`)
-  - sequences, sets and arrays of case classes (`case class Group(members: Set[User])`)
-  - maps of case classes (`case class UserTopic(topics: Map[Topic, User])`)
-  - combination of these
+  - sequences, sets and arrays within case classes (`case class Group(members: Set[User])`)
+  - maps within case classes (`case class UserTopic(topics: Map[Topic, User])`)
+  - sequences and arrays of case classes (`Array[User]`)
+  - maps of case classses (`Map[Int, Group]`)
 
 Everythings else will be compare by `!=` and completely reported on failure.
 
-If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala#L90) to get an idea how to implement it.
+If you need something else take a look [here](https://github.com/pheymann/artie/blob/master/core/src/main/scala/artie/GenericDiff.scala) to get an idea how to implement it.
 
 ### Add your Database
 You can add your Database as easy as this:
