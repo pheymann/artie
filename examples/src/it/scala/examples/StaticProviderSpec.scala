@@ -7,7 +7,7 @@ import util._
 
 import play.api.libs.json._
 
-object StaticProviderSpec extends suite.RefactoringSpec("static-provider") {
+object StaticProviderSpec extends RefactoringSpec("static-provider") {
 
   import PlayJsonToRead._
 

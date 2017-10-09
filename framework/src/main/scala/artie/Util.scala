@@ -6,7 +6,7 @@ object Util {
 
   case class LazyCheck(run: () => Future[TestState])
 
-  def runSpec(spec: suite.RefactoringSpec): Future[TestState] = {
+  def runSpec(spec: RefactoringSpec): Future[TestState] = {
     import spec._
 
     println(s"testing refactorings for $service:")

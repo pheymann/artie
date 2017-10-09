@@ -5,7 +5,7 @@ import artie.implicits._
 
 import util._
 
-object DatabaseProviderSpec extends suite.RefactoringSpec("database-provider") {
+object DatabaseProviderSpec extends RefactoringSpec("database-provider") {
 
   import PlayJsonToRead._
 

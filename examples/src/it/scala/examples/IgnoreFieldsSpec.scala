@@ -5,7 +5,7 @@ import artie.implicits._
 
 import util._
 
-object IgnoreFieldsSpec extends suite.RefactoringSpec("ignore-fields-provider") {
+object IgnoreFieldsSpec extends RefactoringSpec("ignore-fields-provider") {
 
   import PlayJsonToRead._
 

@@ -1,6 +1,6 @@
 package examples
 
-import artie.suite.RefactoringSuite
+import artie.RefactoringSuite
 
 object ExampleSuite extends RefactoringSuite {
 

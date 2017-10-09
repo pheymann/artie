@@ -1,13 +1,11 @@
-package artie.suite
+package artie
 
-import artie._
-
-import artie.Util._
+import Util._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-/** Framework to collect multiple `suite.RefactoringSpec`s and execute them together. */
+/** Framework to collect multiple `RefactoringSpec`s and execute them together. */
 abstract class RefactoringSuite {
 
   def specs: Seq[RefactoringSpec]
