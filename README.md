@@ -137,7 +137,11 @@ Config("base-host", 80, "ref-host", 80)
  - `shownDiffsLimit`: [default = 1] how many diffs are shown
 
 ### Providers
-Providers provide a collection of elements of some type `A` for later usage with [data selectors](#data-selector).
+Providers provide a collection of elements of some type `A` for later usage with [data selectors](#data-selector). They have to be tagged (with `Symbol`s) when passed to a test case:
+
+```Scala
+val providers = Providers ~ ('tag0, prov0) ~ ('tag1, prov1)
+```
 
 #### Static
 Provides data from a static sequence:
@@ -172,17 +176,16 @@ val db0 = mysql(<host>, <user>, <password>)
 val db1 = h2(<host>, <user>, <password>)
 ```
 
-### Read responses
-You have to provide functions mapping raw json strings to your `case class` instances.
-They are called `Read`s and implemented like this:
+### Read REST responses
+Now that we have described config and providers we still need the Json mapping. This is done by creating an instance of `Read` for your response type:
 
 ```Scala
-// by hand
+// manually for every type
 val userRead = new Read[User] {
   def apply(json: String): Either[String, User] = ???
 }
 
-// or by reusing your mappings from some frameworks
+// or by reusing your mappings from some json-frameworks
 object PlayJsonToRead {
 
   def read[U](implicit reads: play.json.Reads[U]): Read[U] = new Read[U] {
@@ -195,15 +198,30 @@ object PlayJsonToRead {
 }
 ```
 
-### Data Selector
-You can select data for your requests by:
+Now we can build a test case by calling `check`:
 
 ```Scala
-select('id, p).next // single element
-select('id, p).nextOpt // single element which can be `Some` or `None`
-select('id, p).nextSeq(10) // sequence of elements of length 10
-select('id, p).nextSet(10) // set of elements of maximum size 10
+// r := Random instance
+// p := list of all our tagged providers
+check("my endpoint", providers, config, read[User]) { implicit r => p =>
+  ???
+}
 ```
+
+But wait, how do we get data out of our provider instance `p` to build requests?
+
+### Data Selector
+You can select data from some provider `'tag` as shown below:
+
+```Scala
+implicit r => p => 
+  select('tag, p).next // single element
+  select('tag, p).nextOpt // single element which can be `Some` or `None`
+  select('tag, p).nextSeq(10) // sequence of elements of length 10
+  select('tag, p).nextSet(10) // set of elements of maximum size 10
+```
+
+If you try to access a provider which isn't part of `p` the compile will tell you.
 
 ### Request Builder
 You can create:
@@ -215,24 +233,32 @@ You can create:
 requests by calling:
 
 ```Scala
-get(<url>, <query-params>, <headers>)
+get("http://my.service/test")
 
-post((<url>, <query-params>, <headers>, Some(<json-string>))
+post("http://my.service/test", contentO = Some("""{"id":0}"""))
 ```
 
 #### Query Parameter and Headers
-If you need query params or headers use:
+If you need query parameters or headers use:
 
 ```Scala
 val p = Params <&> ("a", 1) <&> ("b", Some(0)) <&> ("c", Seq(1, 2, 3))
 val h = Headers <&> ("Content-Type", "application/json")
 
-post(???, p, h, Some("""{"id": 0}"""))
+get("http://my.service/test", params = p, headers = h)
 ```
 
 ### Test Suite
-You don't want to execute all your specs by hand? Then you `artie.suite.RefactoringSpec` (as replacement for
-`artie.RefactoringSpec`) and `artie.suite.RefactoringSuite` to build and collect specs you execute together.
+You don't want to execute all your specs by hand? Then add a `RefactoringSuite`:
+
+```Scala
+object MySuite extends RefactoringSuite {
+  
+  val specs = FirstSpec :: SecondSpec :: Nil
+}
+```
+
+This will execute all your `RefactoringSpec`s you add to `specs` in sequence.
 
 ### Ignore Response Fields
 Sometimes it is necessary to ignore some response fields (eg. timestamp). If you don't want to rewrite your
