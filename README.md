@@ -46,7 +46,7 @@ And run it:
 
 ```
 # if both instances behave the same
-sbt "it:runMain MyServiceRefactoring"
+sbt "runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
@@ -76,15 +76,7 @@ For some examples take a look [here](https://github.com/pheymann/artie/tree/mast
 ## Table of Contents
  - [Get This Framework](#get-this-framework)
  - [Dependencies](#dependencies)
- - [Read responses](#read-responses)
- - [Providers](#providers)
- - [TestConfig](#testconfig)
- - [Data Selector](#data-selector)
- - [Request Builder](#request-builder)
- - [Test Suite](#test-suite)
- - [Ignore Response Fields](#ignore-response-fields)
- - [Response Comparison](#response-comparison)
- - [Add your Database](#add-your-database)
+ - [Documentation](#documentation)
 
 ### Get This Framework
 You can add it as dependency for Scala **2.11** and **2.12**:
@@ -102,12 +94,83 @@ cd artie
 sbt "publishLocal"
 ```
 
-In **Master** you will find the build for Scala 2.12.x. If you need 2.11.x checkout branch [2.11.x](https://github.com/pheymann/artie/tree/2.11.x).
-
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
   - [shapeless](https://github.com/milessabin/shapeless/)
   - [scalaj-http](https://github.com/scalaj/scalaj-http/)
+
+## Documentation
+In the following I'll describe the basic elements of a refactoring spec: test configuration (`TestConfig`), data providers (`Provider`) and multiple test cases (`check`), in more detail.
+
+### Table of Contents
+ - [TestConfig](#testconfig)
+ - [Providers](#providers)
+ - [Read responses](#read-responses)
+ - [Data Selector](#data-selector)
+ - [Request Builder](#request-builder)
+ - [Test Suite](#test-suite)
+ - [Ignore Response Fields](#ignore-response-fields)
+ - [Response Comparison](#response-comparison)
+ - [Add your Database](#add-your-database)
+
+### TestConfig
+Configuration for test execution and *rest* calls:
+
+```Scala
+Config("base-host", 80, "ref-host", 80)
+  .repetitions(100)
+  .parallelism(3)
+  .stopOnFailure(false)
+  .shownDiffsLimit(10)
+```
+
+**Mandatory**:
+ - `baseHost`: host address of the old/original service
+ - `basePort`: port of the old/original service
+ - `refactoredHost`: host address of the new/refactored service
+ - `refactoredPort`: port of the new/refactored service
+
+**Additional settings**:
+ - `repetitions`: [default = 1] how many requests will be created (repeat this check)
+ - `parallelism`: [default = 1] how many requests can be ran in parallel
+ - `stopOnFailure`: [default = true] if set to `false` the test will continue in the presence of a difference
+ - `shownDiffsLimit`: [default = 1] how many diffs are shown
+
+### Providers
+Providers provide a collection of elements of some type `A` for later usage with [data selectors](#data-selector).
+
+#### Static
+Provides data from a static sequence:
+
+```Scala
+provide[User].static(User("foo"), User("bar"))
+```
+
+#### Random
+Provides data from a random generator in a range of `min` / `max`:
+
+```Scala
+provide[Long].random(0, 100)
+```
+
+#### Database
+Provides data from a Database query:
+
+```Scala
+// provide a query (add a LIMIT as all data is eagerly loaded)!
+provide[Long].database("select id from users limit 100", db)
+
+// or randomly select 100 elements
+provide[Long].database.random("users", "id", 100, db)
+```
+
+##### Database
+Currently **artie** provides you with `mysql` and `h2` which can be used like this:
+
+```Scala
+val db0 = mysql(<host>, <user>, <password>)
+val db1 = h2(<host>, <user>, <password>)
+```
 
 ### Read responses
 You have to provide functions mapping raw json strings to your `case class` instances.
@@ -131,68 +194,6 @@ object PlayJsonToRead {
   }
 }
 ```
-
-### Providers
-Providers select elements randomly from an underlying data set (more informaion [here](#data-selector)).
-
-To select the next element you have to determine the provide by its **id**:
-
-```Scala
-// for a scalar value
-val id = select('userIds, providers).next
-
-// for an Option; maybe a Some maybe a None
-val idO = select('userIds, providers).nextOpt
-```
-
-This **id** based select is typesafe thanks to [shapeless](https://github.com/milessabin/shapeless). 
-This means your compiler will tell you if you try to select an non-existing provider.
-
-#### Static
-Provides data from a static sequence:
-
-```Scala
-provide[User].static(User("foo"), User("bar"))
-```
-
-#### Random
-Provides data from a random generator in a range of `min` / `max`:
-
-```Scala
-provide[Long].random(0, 100)
-```
-
-#### Database
-Provides data from a Database query:
-
-```Scala
-// provide a query (add a LIMIT as all data is eagerly loaded)!
-provide[Long].database("select id from users limit 100", db)
-
-// or randomly select elements
-provide[Long].database.random("users", "id", 100, db)
-```
-
-##### Database
-Currently provided are `mysql` and `h2` and have to be used like this:
-
-```Scala
-val db0 = mysql(<host>, <user>, <password>)
-val db1 = h2(<host>, <user>, <password>)
-```
-
-### TestConfig
-Mandatory informations:
- - `baseHost`: host address of the old service
- - `basePort`: port of the old service
- - `refactoredHost`: host address of the new (refactored) service
- - `refactoredPort`: port of the new (refactored) service
-
-Additional settings (function calls):
- - `repetitions`: how many requests will be created (repeat this check)
- - `parallelism`: how many requests can be ran in parallel
- - `stopOnFailure`: default is `true`, if set to `false` the test will continue in the presence of a difference
- - `shownDiffsLimit`: default is `1`, how many diffs are shown
 
 ### Data Selector
 You can select data for your requests by:
