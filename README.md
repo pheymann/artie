@@ -48,6 +48,7 @@ sbt "runMain MyServiceRefactoring"
 
 testing refactorings for my-service:
   + check get-user
+    processed: 1 / 1
 
 Success: Total: 1; Succeeded: 1, Invalid: 0; Failed: 0
 
@@ -81,7 +82,7 @@ You can add it as dependency for Scala **2.11** and **2.12**:
 
 ```Scala
 // take a look at the maven batch to find the latest version
-libraryDependencies += "com.github.pheymann" %% "artie" % <version> % Test
+libraryDependencies += "com.github.pheymann" %% "artie" % <version>
 ```
 
 or build it locally:
