@@ -95,8 +95,8 @@ sbt "publishLocal"
 
 ### Dependencies
 I tried to keep the dependencies to external libraries as small as possible. Currently this framework uses:
-  - [shapeless](https://github.com/milessabin/shapeless/)
-  - [scalaj-http](https://github.com/scalaj/scalaj-http/)
+  - [shapeless 2.3.2](https://github.com/milessabin/shapeless/)
+  - [scalaj-http 2.3.0](https://github.com/scalaj/scalaj-http/)
 
 ## Documentation
 In the following I'll describe the basic elements of a refactoring spec: test configuration (`TestConfig`), data providers (`Provider`) and multiple test cases (`check`), in more detail.
@@ -168,11 +168,12 @@ provide[Long].database.random("users", "id", 100, db)
 ```
 
 ##### Database
-Currently **artie** provides you with `mysql` and `h2` which can be used like this:
+Currently **artie** provides you with `mysql`, `postgres` and `h2` which can be used like this:
 
 ```Scala
 val db0 = mysql(<host>, <user>, <password>)
-val db1 = h2(<host>, <user>, <password>)
+val db1 = postgres(<host>, <user>, <password>)
+val db2 = h2(<host>, <user>, <password>)
 ```
 
 ### Read REST responses
