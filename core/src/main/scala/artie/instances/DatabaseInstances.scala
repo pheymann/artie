@@ -9,7 +9,7 @@ abstract class MySql extends Database {
   def qualifiedHost = "jdbc:mysql://" + host
 
   def randomQuery(table: String, column: String, limit: Int): String =
-    s"""SELECT DISTINCT t.$column
+    s"""SELECT t.$column
        |FROM $table AS t
        |ORDER BY RAND()
        |LIMIT $limit
@@ -23,7 +23,7 @@ abstract class H2 extends Database {
   def qualifiedHost = "jdbc:h2:" + host
 
   def randomQuery(table: String, column: String, limit: Int): String =
-    s"""SELECT DISTINCT t.$column
+    s"""SELECT t.$column
        |FROM $table AS t
        |ORDER BY RAND()
        |LIMIT $limit
