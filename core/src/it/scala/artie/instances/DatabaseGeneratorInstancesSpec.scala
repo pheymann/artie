@@ -10,7 +10,7 @@ final class DatabaseGeneratorInstancesSpec extends Specification {
 
   import autoimport._
 
-  val table = "dbis_table"
+  val table = "db_table"
 
   val createTable =
     s"""CREATE TABLE $table (

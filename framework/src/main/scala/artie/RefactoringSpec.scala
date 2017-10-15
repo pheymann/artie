@@ -16,7 +16,7 @@ import scala.concurrent.duration._
   */
 abstract class RefactoringSpec(val service: String) {
 
-  implicit val ec = global
+  implicit def executionContext = global
 
   // if set to `false` checks will be executed in parallel
   var isSequential = true
