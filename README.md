@@ -279,7 +279,7 @@ the compiler will tell you.
 ### Override ExecutionContext
 **artie** uses `ExecutionContext.global` by default, but if you need a specific context you can override it with:
 
-```
+```Scala
 object MyRefactoring extends RefactoringSpec {
   override implicit val executionContext = myContext
   
