@@ -109,6 +109,7 @@ In the following I'll describe the basic elements of a refactoring spec: test co
  - [Request Builder](#request-builder)
  - [Test Suite](#test-suite)
  - [Ignore Response Fields](#ignore-response-fields)
+ - [Override ExecutionContext](#override-executioncontext)
  - [Response Comparison](#response-comparison)
  - [Add your Database](#add-your-database)
 
@@ -274,6 +275,17 @@ check("log-endpoint", providers, conf, read[Log]) { ...}
 
 The `Symbol` has to be equal to the field name. If you write something which doesn't exists in your `case class`
 the compiler will tell you.
+
+### Override ExecutionContext
+**artie** uses `ExecutionContext.global` by default, but if you need a specific context you can override it with:
+
+```
+object MyRefactoring extends RefactoringSpec {
+  override implicit val executionContext = myContext
+  
+  ...
+}
+```
 
 ### Response Comparison
 Response comparison is done by creating a list of field-value pairs ([LabelledGenerics](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)) from your responses of class `R` 
