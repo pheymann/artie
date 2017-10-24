@@ -5,6 +5,7 @@ import scalaj.http._
 
 import scala.util.Random
 import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.duration.FiniteDuration
 
 object TestEngine {
 
@@ -33,8 +34,8 @@ object TestEngine {
     def request(p: P): Future[(RequestT, ResponseT, ResponseT)] =
       Future {
         val request    = requestGen(rand)(p)
-        val base       = ioEffect(toHttpRequest(config.base, request))
-        val refactored = ioEffect(toHttpRequest(config.refactored, request))
+        val base       = ioEffect(toHttpRequest(config.base, request, config.requestTimeout))
+        val refactored = ioEffect(toHttpRequest(config.refactored, request, config.requestTimeout))
 
         (request, base, refactored)
       }
@@ -131,19 +132,19 @@ object TestEngine {
     }
   }
 
-  private[artie] def toHttpRequest(baseUri: String, request: RequestT): HttpRequest = request match {
-    case (Get, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("GET")
+  private[artie] def toHttpRequest(baseUri: String, request: RequestT, timeout: FiniteDuration): HttpRequest = request match {
+    case (Get, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt)).method("GET")
 
     case (Put, uri, params, headers, contentO) =>
-      val base = Http(baseUri + uri).params(params).headers(headers)
+      val base = Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt))
 
       contentO.fold(base.method("Pust"))(base.put(_))
 
     case (Post, uri, params, headers, contentO) =>
-      val base = Http(baseUri + uri).params(params).headers(headers)
+      val base = Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt))
 
       contentO.fold(base.method("POST"))(base.postData(_))
 
-    case (Delete, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("DELETE")
+    case (Delete, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt)).method("DELETE")
   }
 }

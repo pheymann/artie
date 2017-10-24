@@ -25,10 +25,14 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
 
   "TestEngine" >> {
     "RequestT to HttpRequest" >> {
-      toHttpRequest("base", get("/uri")) === Http("base/uri")
-      toHttpRequest("base", post("/uri", contentO = Some("content"))) === Http("base/uri").postData("content")
-      toHttpRequest("base", put("/uri", contentO = Some("content"))) === Http("base/uri").put("content")
-      toHttpRequest("base", delete("/uri")) === Http("base/uri").method("DELETE")
+      def compare(l: HttpRequest, r: HttpRequest) = {
+        l.copy(options = Nil) === r.copy(options = Nil)
+      }
+
+      compare(toHttpRequest("base", get("/uri"), 1.second), Http("base/uri").option(HttpOptions.readTimeout(1000)))
+      compare(toHttpRequest("base", post("/uri", contentO = Some("content")), 1.second), Http("base/uri").option(HttpOptions.readTimeout(1000)).postData("content"))
+      compare(toHttpRequest("base", put("/uri", contentO = Some("content")), 1.second), Http("base/uri").option(HttpOptions.readTimeout(1000)).put("content"))
+      compare(toHttpRequest("base", delete("/uri"), 1.second),  Http("base/uri").option(HttpOptions.readTimeout(1000)).method("DELETE"))
     }
 
     "compare HttpResponses from base and refactored" >> {
