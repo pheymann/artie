@@ -82,6 +82,11 @@ final class TestEngineSpec(implicit ee: ExecutionEnv) extends Specification {
       run(null, provs, conf.repetitions(10), gen(provs), read, _ => resp0) must beEqualTo(TestState(10, 0, 0)).awaitFor(1.second)
       run(null, provs, conf.repetitions(10).parallelism(2), gen(provs), read, _ => resp0) must beEqualTo(TestState(10, 0, 0)).awaitFor(1.second)
 
+      // exception handling
+      val req = gen(provs)
+      run(null, provs, conf, req, read, _ => throw new java.net.SocketTimeoutException("test")) must beEqualTo(TestState(0, 0, 1, Seq(RequestTimeoutDiff(req(null)(null), "test")))).awaitFor(1.second)
+      run(null, provs, conf, req, read, _ => throw new NullPointerException("test")) must throwA(new NullPointerException("test")).awaitFor(1.second)
+
       val fakeIo: HttpRequest => HttpResponse[String] = {
         var counter = 0
 
