@@ -6,7 +6,8 @@
 You want to change a (legacy) REST service which has no tests and it is impossible to
 write some tests without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
-two instances of your service (old and new) and compare the responses.
+two instances of your service (old and new) and compare the responses. And it is doing that
+by letting the compiler doing most of the work. So, no boilerplate, but small and concise tests.
 
 The only thing you have to do is:
 
@@ -110,7 +111,7 @@ In the following I'll describe the basic elements of a refactoring spec: test co
  - [Test Suite](#test-suite)
  - [Ignore Response Fields](#ignore-response-fields)
  - [Override ExecutionContext](#override-executioncontext)
- - [Response Comparison](#response-comparison)
+ - [Generic Response Comparison](#response-comparison)
  - [Add your Database](#add-your-database)
 
 ### TestConfig
