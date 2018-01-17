@@ -6,8 +6,8 @@
 You want to change a (legacy) REST service which has no tests and it is impossible to
 write some tests without rebuilding the whole thing? If so this tool may help you. It is
 a small framework to generate REST request from different data sets, run them against
-two instances of your service (old and new) and compare the responses. And it is doing that
-by letting the compiler doing most of the work. So, no boilerplate, but small and concise tests.
+two instances of your service (old and new) and compare the responses. It lets you write small
+and concise tests, the compiler will do the rest.
 
 The only thing you have to do is:
 
