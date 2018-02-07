@@ -1,5 +1,7 @@
 # ide
 ensime-plugin.sbt
+.ensime
+.ensime_cache
 *.*~
 
 # sbt

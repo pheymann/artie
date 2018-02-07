@@ -84,12 +84,13 @@ final class ArtieDslSpec(implicit ee: ExecutionEnv) extends Specification {
     }
 
     "create TestConfig" >> {
-      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1, true)
+      Config("base", 0, "ref", 1) === TestConfig("base", 0, "ref", 1, 1, 1, true, 1, true, 10.seconds)
       Config("base", 0, "ref", 1)
         .parallelism(10)
         .repetitions(100)
         .stopOnFailure(false)
-        .shownDiffsLimit(10) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10, true)
+        .shownDiffsLimit(10)
+        .requestTimeout(5.seconds) === TestConfig("base", 0, "ref", 1, 100, 10, false, 10, true, 5.seconds)
     }
 
     "create test case" >> {

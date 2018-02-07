@@ -5,10 +5,17 @@ import scalaj.http._
 
 import scala.util.Random
 import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.duration.FiniteDuration
+
+import java.net.SocketTimeoutException
 
 object TestEngine {
 
   type ResponseT = HttpResponse[String]
+
+  final case class RequestTimeoutDiff(request: RequestT, msg: String) extends Diff {
+    def stringify(ind: String) = ind + show(request) + "\nrequest timeout: " + msg
+  }
 
   final case class ResponseCodeDiff(request: RequestT, text: String) extends Diff {
     def stringify(ind: String) = ind + show(request) + "\n" + ind + text
@@ -30,14 +37,19 @@ object TestEngine {
                         (implicit ec: ExecutionContext,
                                   diff: GenericDiffRunner[A]): Future[TestState] = {
     // build and execute a single request and collect responses
-    def request(p: P): Future[(RequestT, ResponseT, ResponseT)] =
-      Future {
-        val request    = requestGen(rand)(p)
-        val base       = ioEffect(toHttpRequest(config.base, request))
-        val refactored = ioEffect(toHttpRequest(config.refactored, request))
+    def request(p: P): Future[(RequestT, Either[Diff, (ResponseT, ResponseT)])] = {
+      val request = requestGen(rand)(p)
 
-        (request, base, refactored)
+      Future {
+        val base       = ioEffect(toHttpRequest(config.base, request, config.requestTimeout))
+        val refactored = ioEffect(toHttpRequest(config.refactored, request, config.requestTimeout))
+
+        (request, Right((base, refactored)))
+      }.recover {
+        case cause: SocketTimeoutException => (request, Left(RequestTimeoutDiff(request, cause.getMessage())))
+        case other                         => throw other
       }
+    }
 
     // stack-safe
     def engine(p: P, state: TestState): Future[TestState] = {
@@ -52,8 +64,9 @@ object TestEngine {
             request(p)
           }
         ).flatMap { responses =>
-          val newState = responses.foldLeft(state) { case (accState, (request, base, refactored)) =>
-            compareResponses(request, base, refactored, read, accState, config.diffLimit)
+          val newState = responses.foldLeft(state) { 
+            case (accState, (request, Right((base, refactored)))) => compareResponses(request, base, refactored, read, accState, config.diffLimit)
+            case (accState, (request, Left(errorDiff)))           => accState.copy(failed = accState.failed + 1, reasons = addReasons(accState, config.diffLimit, Seq(errorDiff)))
           }
 
           if (config.showProgress)
@@ -72,6 +85,12 @@ object TestEngine {
     }
   }
 
+  private def addReasons(state: TestState, diffLimit: Int, reasons: Seq[Diff]): Seq[Diff] =
+    if (state.reasons.length >= diffLimit)
+      state.reasons
+    else
+      reasons ++: state.reasons
+
   private[artie] def compareResponses[A](request: RequestT,
                                          base: HttpResponse[String],
                                          refactored: HttpResponse[String],
@@ -79,34 +98,28 @@ object TestEngine {
                                          state: TestState,
                                          diffLimit: Int)
                                         (implicit diff: GenericDiffRunner[A]): TestState = {
-    def addReasons(reasons: Seq[Diff]): Seq[Diff] =
-      if (state.reasons.length >= diffLimit)
-        state.reasons
-      else
-        reasons ++: state.reasons
-
     if (base.isError && refactored.isError) {
       if (base.code == refactored.code) {
         val reason = ResponseCodeDiff(request, s"invalid:\n  $base\n  $refactored")
 
-        state.copy(invalid = state.invalid + 1, reasons = addReasons(Seq(reason)))
+        state.copy(invalid = state.invalid + 1, reasons = addReasons(state, diffLimit, Seq(reason)))
       }
       else {
         val baseReason   = ResponseCodeDiff(request, "base service status error:\n  " + base)
         val refactReason = ResponseCodeDiff(request, "refactored service status error:\n  " + refactored)
 
-        state.copy(failed = state.failed + 1, reasons = addReasons(Seq(baseReason, refactReason)))
+        state.copy(failed = state.failed + 1, reasons = addReasons(state, diffLimit, Seq(baseReason, refactReason)))
       }
     }
     else if (base.isError) {
       val reason = ResponseCodeDiff(request, "base service status error:\n  " + base)
 
-      state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
+      state.copy(failed = state.failed + 1, reasons = addReasons(state, diffLimit, Seq(reason)))
     }
     else if (refactored.isError) {
       val reason = ResponseCodeDiff(request, "refactored service status error:\n  " + refactored)
 
-      state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
+      state.copy(failed = state.failed + 1, reasons = addReasons(state, diffLimit, Seq(reason)))
     }
     else {
       val stateE = for {
@@ -120,7 +133,7 @@ object TestEngine {
         else {
           val reason = ResponseContentDiff(request, differences)
 
-          state.copy(failed = state.failed + 1, reasons = addReasons(Seq(reason)))
+          state.copy(failed = state.failed + 1, reasons = addReasons(state, diffLimit, Seq(reason)))
         }
       }
 
@@ -131,19 +144,19 @@ object TestEngine {
     }
   }
 
-  private[artie] def toHttpRequest(baseUri: String, request: RequestT): HttpRequest = request match {
-    case (Get, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("GET")
+  private[artie] def toHttpRequest(baseUri: String, request: RequestT, timeout: FiniteDuration): HttpRequest = request match {
+    case (Get, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt)).method("GET")
 
     case (Put, uri, params, headers, contentO) =>
-      val base = Http(baseUri + uri).params(params).headers(headers)
+      val base = Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt))
 
       contentO.fold(base.method("Pust"))(base.put(_))
 
     case (Post, uri, params, headers, contentO) =>
-      val base = Http(baseUri + uri).params(params).headers(headers)
+      val base = Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt))
 
       contentO.fold(base.method("POST"))(base.postData(_))
 
-    case (Delete, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).method("DELETE")
+    case (Delete, uri, params, headers, _) => Http(baseUri + uri).params(params).headers(headers).option(HttpOptions.readTimeout(timeout.toMillis.toInt)).method("DELETE")
   }
 }
